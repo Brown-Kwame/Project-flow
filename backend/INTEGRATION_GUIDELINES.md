@@ -25,6 +25,23 @@ This document provides beginner-friendly guidelines for integrating backend serv
 - **REST APIs:** Expose endpoints using standard HTTP methods (GET, POST, PUT, DELETE).
 - **CORS:** Ensure CORS is enabled to allow frontend requests.
 - **Data Format:** Use JSON for request and response bodies.
+- **How to Send JSON Data (Java Spring Example):**
+  ```java
+  // Controller method to accept JSON
+  @PostMapping("/api/example")
+  public ResponseEntity<YourModel> create(@RequestBody YourModel data) {
+      // ... handle data ...
+      return ResponseEntity.ok(data);
+  }
+
+  // To send JSON from backend
+  @GetMapping("/api/example")
+  public ResponseEntity<YourModel> getExample() {
+      YourModel data = new YourModel();
+      // ... populate data ...
+      return ResponseEntity.ok(data); // Spring automatically serializes to JSON
+  }
+  ```
 - **API Documentation:** Document endpoints using Swagger/OpenAPI or similar tools.
 - **Error Handling:** Return clear error messages and status codes.
 
