@@ -17,7 +17,20 @@ This document provides beginner-friendly guidelines for integrating and developi
 - Expose REST endpoints for analytics queries.
 - Store analytics data in a database (e.g., PostgreSQL).
 
-## 2. API Guidelines
+## 2. Connecting to PostgreSQL
+- **JDBC/ORM:** Use JDBC or an ORM (like Hibernate/JPA for Java) to connect to PostgreSQL.
+- **Configuration:** Store DB credentials securely (e.g., environment variables or config files).
+- **Connection Example (Spring Boot):**
+  ```properties
+  # application.properties
+  spring.datasource.url=jdbc:postgresql://localhost:5432/analyticsdb
+  spring.datasource.username=youruser
+  spring.datasource.password=yourpassword
+  ```
+- **Migrations:** Use tools like Flyway or Liquibase for DB migrations.
+- **Error Handling:** Catch and log SQL exceptions.
+
+## 3. API Guidelines
 - Use JSON for all requests and responses.
 - Document endpoints with Swagger/OpenAPI.
 - Example (Java Spring):
@@ -29,12 +42,12 @@ This document provides beginner-friendly guidelines for integrating and developi
   }
   ```
 
-## 3. Data Handling
+## 4. Data Handling
 - Use JDBC/ORM for DB access.
 - Store credentials in environment variables.
 - Use migration tools for schema changes.
 
-## 4. Best Practices
+## 5. Best Practices
 - Comment code, especially for data aggregation logic.
 - Write tests for endpoints and data processing.
 - Log important events and errors.
