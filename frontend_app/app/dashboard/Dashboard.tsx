@@ -85,7 +85,7 @@ const Dashboard = () => {
           chartConfig={chartConfig}
           bezier
           style={styles.chart}
-          onDataPointClick={({ value }) => setSelectedValue(value)}
+          onDataPointClick={(data: { value: number }) => setSelectedValue(data.value)}
         />
         {selectedValue !== null && (
           <Text style={styles.selectedValue}>Selected: {selectedValue}</Text>
@@ -94,7 +94,20 @@ const Dashboard = () => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Project Status Distribution</Text>
         <BarChart
-          data={barData}
+          data={{
+            labels: barData.labels,
+            datasets: [
+              {
+                data: barData.datasets[0].data,
+                colors: [
+                  (opacity = 1) => `rgba(51, 102, 255, ${opacity})`, // Active - vivid blue
+                  (opacity = 1) => `rgba(255, 153, 0, ${opacity})`,  // Planning - vivid orange
+                  (opacity = 1) => `rgba(56, 203, 93, ${opacity})`,  // Done - vivid green
+                  (opacity = 1) => `rgba(255, 87, 34, ${opacity})`,  // On Hold - vivid orange-red
+                ],
+              },
+            ],
+          }}
           width={screenWidth - 32}
           height={180}
           chartConfig={chartConfig}
@@ -102,6 +115,45 @@ const Dashboard = () => {
           fromZero
           yAxisLabel={''}
           yAxisSuffix={''}
+          flatColor={false}
+          withCustomBarColorFromData={true}
+          showBarTops={true}
+          segments={4}
+          propsForBars={{
+            strokeWidth: 4,
+            stroke: 'url(#barGlowGradient)',
+            // fallback for each bar, will be overridden by custom SVG gradient below
+          }}
+          renderBar={({ x, y, width, height, index, value }) => {
+            // Custom rendering for each bar to add a glow effect
+            const barColors = [
+              '#3366ff', // Active
+              '#ff9900', // Planning
+              '#38cb5d', // Done
+              '#ff5722', // On Hold
+            ];
+            const glowColors = [
+              'rgba(51,102,255,0.45)',
+              'rgba(255,153,0,0.45)',
+              'rgba(56,203,93,0.45)',
+              'rgba(255,87,34,0.45)',
+            ];
+            return (
+              <g key={index}>
+                <rect
+                  x={x}
+                  y={y}
+                  width={width}
+                  height={height}
+                  fill={barColors[index]}
+                  stroke={glowColors[index]}
+                  strokeWidth={8}
+                  rx={6}
+                  style={{ filter: 'drop-shadow(0 0 8px ' + glowColors[index] + ')' }}
+                />
+              </g>
+            );
+          }}
         />
       </View>
       <View style={styles.section}>

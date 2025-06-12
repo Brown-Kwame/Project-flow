@@ -20,6 +20,21 @@ const sleekCard = {
   borderWidth: 1,
   borderColor: '#00c6ff33',
 };
+const glowingButton = {
+  marginTop: 10,
+  borderRadius: 16,
+  padding: 10,
+  paddingHorizontal: 24,
+  shadowColor: '#00c6ff',
+  shadowOffset: { width: 0, height: 0 },
+  shadowOpacity: 0.7,
+  shadowRadius: 12,
+  elevation: 8,
+  borderWidth: 2,
+  borderColor: '#00c6ff',
+  alignItems: 'center',
+  minWidth: 160,
+};
 
 export default function SettingsAccountsScreen() {
   // For draggable profile card
@@ -45,19 +60,17 @@ export default function SettingsAccountsScreen() {
   };
 
   return (
-    <ScrollView
-    
-    >
+    <ScrollView>
       <ThemedView style={{ ...sleekCard, alignItems: 'center', marginTop: 16 }}>
         <Animated.View style={{ transform: pan.getTranslateTransform() }} {...panResponder.panHandlers}>
           <Image source={require('../../assets/images/home2.webp')} style={{ width: 90, height: 90, borderRadius: 45, marginBottom: 12, borderWidth: 2, borderColor: '#00c6ff' }} />
           <ThemedText type="title">James Doe</ThemedText>
           <ThemedText style={{ color: '#00c6ff', marginBottom: 8 }}>Pro User</ThemedText>
         </Animated.View>
-        <TouchableOpacity onPress={handleShare} style={{ marginTop: 10, backgroundColor: '#00c6ff', borderRadius: 16, padding: 10, paddingHorizontal: 24 }}>
+        <TouchableOpacity onPress={handleShare} style={glowingButton}>
           <ThemedText style={{ color: '#fff', fontWeight: 'bold' }}>Share App</ThemedText>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => Linking.openURL('https://yourapp.com/integrations')} style={{ marginTop: 10, backgroundColor: '#2c5364', borderRadius: 16, padding: 10, paddingHorizontal: 24 }}>
+        <TouchableOpacity onPress={() => Linking.openURL('https://yourapp.com/integrations')} style={{ ...glowingButton, backgroundColor: '#2c5364', borderColor: '#2c5364', shadowColor: '#2c5364' }}>
           <ThemedText style={{ color: '#fff', fontWeight: 'bold' }}>App Integrations</ThemedText>
         </TouchableOpacity>
       </ThemedView>
@@ -65,32 +78,32 @@ export default function SettingsAccountsScreen() {
         <ThemedText type="title">Account Settings</ThemedText>
         <ThemedText>Email: james@futurist.com</ThemedText>
         <ThemedText>Plan: Pro</ThemedText>
-        <TouchableOpacity onPress={() => Linking.openURL('https://yourapp.com/account')} style={{ marginTop: 10, backgroundColor: '#00c6ff', borderRadius: 16, padding: 10, paddingHorizontal: 24 }}>
+        <TouchableOpacity onPress={() => Linking.openURL('https://yourapp.com/account')} style={glowingButton}>
           <ThemedText style={{ color: '#fff', fontWeight: 'bold' }}>Manage Account</ThemedText>
         </TouchableOpacity>
       </ThemedView>
       <ThemedView style={{ ...sleekCard }}>
         <ThemedText type="title">Security</ThemedText>
-        <TouchableOpacity onPress={() => Linking.openURL('https://yourapp.com/security')} style={{ marginTop: 10, backgroundColor: '#2c5364', borderRadius: 16, padding: 10, paddingHorizontal: 24 }}>
+        <TouchableOpacity onPress={() => Linking.openURL('https://yourapp.com/security')} style={{ ...glowingButton, backgroundColor: '#2c5364', borderColor: '#2c5364', shadowColor: '#2c5364' }}>
           <ThemedText style={{ color: '#fff', fontWeight: 'bold' }}>Update Password</ThemedText>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => Linking.openURL('https://yourapp.com/2fa')} style={{ marginTop: 10, backgroundColor: '#00c6ff', borderRadius: 16, padding: 10, paddingHorizontal: 24 }}>
+        <TouchableOpacity onPress={() => Linking.openURL('https://yourapp.com/2fa')} style={glowingButton}>
           <ThemedText style={{ color: '#fff', fontWeight: 'bold' }}>Enable 2FA</ThemedText>
         </TouchableOpacity>
       </ThemedView>
       <ThemedView style={{ ...sleekCard }}>
         <ThemedText type="title">Connect & Share</ThemedText>
-        <TouchableOpacity onPress={handleShare} style={{ marginTop: 10, backgroundColor: '#00c6ff', borderRadius: 16, padding: 10, paddingHorizontal: 24 }}>
+        <TouchableOpacity onPress={handleShare} style={glowingButton}>
           <ThemedText style={{ color: '#fff', fontWeight: 'bold' }}>Share App</ThemedText>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => Linking.openURL('https://yourapp.com/apps')} style={{ marginTop: 10, backgroundColor: '#2c5364', borderRadius: 16, padding: 10, paddingHorizontal: 24 }}>
+        <TouchableOpacity onPress={() => Linking.openURL('https://yourapp.com/apps')} style={{ ...glowingButton, backgroundColor: '#2c5364', borderColor: '#2c5364', shadowColor: '#2c5364' }}>
           <ThemedText style={{ color: '#fff', fontWeight: 'bold' }}>Access Linked Apps</ThemedText>
         </TouchableOpacity>
       </ThemedView>
       <ThemedView style={{ ...sleekCard }}>
         <ThemedText type="title">Investor Mode</ThemedText>
         <ThemedText>See advanced analytics and growth metrics.</ThemedText>
-        <TouchableOpacity onPress={() => Linking.openURL('https://yourapp.com/investor')} style={{ marginTop: 10, backgroundColor: '#00c6ff', borderRadius: 16, padding: 10, paddingHorizontal: 24 }}>
+        <TouchableOpacity onPress={() => Linking.openURL('https://yourapp.com/investor')} style={glowingButton}>
           <ThemedText style={{ color: '#fff', fontWeight: 'bold' }}>Investor Dashboard</ThemedText>
         </TouchableOpacity>
       </ThemedView>
@@ -101,7 +114,7 @@ export default function SettingsAccountsScreen() {
 const styles = StyleSheet.create({
   headerImage: {
     color: '#808080',
-    bottom: -90,
+    bottom: -91,
     left: -35,
     position: 'absolute',
   },

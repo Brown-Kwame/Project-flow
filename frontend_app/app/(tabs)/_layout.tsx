@@ -33,7 +33,7 @@ export default function TabLayout() {
           title: 'Home',
           headerShown: false,
           // Hide this tab from the tab bar
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />, // This will not show since tabBarButton is null
+          tabBarIcon: ({ color }: { color: string }) => <IconSymbol size={28} name="house.fill" color={color} />, // This will not show since tabBarButton is null
         }}
       />
       <Tabs.Screen
@@ -42,7 +42,7 @@ export default function TabLayout() {
           title: 'Account',
           headerShown: false,
          
-          tabBarIcon: ({ color }) => <FontAwesome size={28} name="user" color={color} />,
+          tabBarIcon: ({ color }: { color: string }) => <FontAwesome size={28} name="user" color={color} />,
         }}
       />
      
