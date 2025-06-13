@@ -65,7 +65,7 @@ const Dashboard = () => {
     },
   ].filter((d) => d.count > 0);
 
-  const [selectedValue, setSelectedValue] = useState<number | null>(null);
+  const [selectedValue, setSelectedValue] = useState(null);
 
   return (
     <ScrollView style={styles.container}>
@@ -85,10 +85,10 @@ const Dashboard = () => {
           chartConfig={chartConfig}
           bezier
           style={styles.chart}
-          onDataPointClick={(data: { value: number }) => setSelectedValue(data.value)}
+          onDataPointClick={(data) => setSelectedValue(data.value)}
         />
         {selectedValue !== null && (
-          <Text style={styles.selectedValue}>Selected: {selectedValue}</Text>
+          <Text style={styles.selectedValue}>Selected: {String(selectedValue)}</Text>
         )}
       </View>
       <View style={styles.section}>

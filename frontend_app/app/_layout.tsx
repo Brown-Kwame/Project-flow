@@ -6,6 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import { ProjectProvider } from './context/ProjectContext';
 import './global.css';
+import { HeaderTitle } from '@react-navigation/elements';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -21,7 +22,8 @@ export default function RootLayout() {
   return (
     <ProjectProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
+        <Stack
+     >
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="Slider" options={{ headerShown: false }} />
          <Stack.Screen name="Goals" options={{ headerShown: false }} />

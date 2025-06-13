@@ -109,13 +109,13 @@ const Index = () => {
             {rows.map((row, i) => (
               <View style={styles.row} key={i}>
                 {row.map((card) => (
-                  <Link href={card.link as any} asChild key={card.title}>
+                  <Link href={card.link } asChild key={card.title}>
                     <HomeCard
                       title={card.title}
                       subtitle={card.subtitle}
                       icon={card.icon}
                       color={card.color}
-                      onPress={() => router.push(card.link as any)}
+                      onPress={() => router.push(card.link)}
                     />
                   </Link>
                 ))}
