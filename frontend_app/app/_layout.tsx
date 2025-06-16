@@ -22,7 +22,10 @@ export default function RootLayout() {
   return (
     <ProjectProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack
+        <Stack  screenOptions={{
+            headerTitle: "", // Hide title, show back arrow
+           // Hide back text on iOS
+          }}
      >
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="Slider" options={{ headerShown: false }} />
