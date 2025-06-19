@@ -11,6 +11,9 @@ const Projects = () => {
   const [search, setSearch] = useState('');
   const [editId, setEditId] = useState<string | null>(null);
   const [editProject, setEditProject] = useState({ name: '', status: '', description: '', owner: '' });
+  const [statusDropdownVisible, setStatusDropdownVisible] = useState(false);
+
+  const statusOptions = ['Planned', 'In Progress', 'Done', 'On Hold'];
 
   // Filter projects by search
   const filteredProjects = useMemo(() => {
@@ -112,12 +115,45 @@ const Projects = () => {
               value={editId ? editProject.name : newProject.name}
               onChangeText={text => editId ? setEditProject({ ...editProject, name: text }) : setNewProject({ ...newProject, name: text })}
             />
-            <TextInput
-              style={styles.input}
-              placeholder="Status"
-              value={editId ? editProject.status : newProject.status}
-              onChangeText={text => editId ? setEditProject({ ...editProject, status: text }) : setNewProject({ ...newProject, status: text })}
-            />
+            {/* Status Dropdown with label */}
+            <View style={{ marginBottom: 12 }}>
+              <Text style={{ marginLeft: 4, marginBottom: 4, fontWeight: '600', color: '#222' }}>Status</Text>
+              <TouchableOpacity
+                style={[styles.input, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#fff' }]}
+                onPress={() => setStatusDropdownVisible(true)}
+                activeOpacity={0.7}
+              >
+                <Text style={{ color: (editId ? editProject.status : newProject.status) ? '#222' : '#888', fontSize: 16 }}>
+                  {(editId ? editProject.status : newProject.status) || 'Select Status...'}
+                </Text>
+                <FontAwesome name="chevron-down" size={18} color="#668cff" />
+              </TouchableOpacity>
+              {/* Status Options Modal */}
+              <Modal
+                visible={statusDropdownVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setStatusDropdownVisible(false)}
+              >
+                <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.2)' }} onPress={() => setStatusDropdownVisible(false)}>
+                  <View style={{ position: 'absolute', left: '5%', right: '5%', top: '35%', backgroundColor: '#fff', borderRadius: 12, padding: 16, elevation: 10 }}>
+                    {statusOptions.map(option => (
+                      <TouchableOpacity
+                        key={option}
+                        style={{ paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#eee' }}
+                        onPress={() => {
+                          if (editId) setEditProject({ ...editProject, status: option });
+                          else setNewProject({ ...newProject, status: option });
+                          setStatusDropdownVisible(false);
+                        }}
+                      >
+                        <Text style={{ color: '#222', fontSize: 16 }}>{option}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </Pressable>
+              </Modal>
+            </View>
             <TextInput
               style={styles.input}
               placeholder="Description"

@@ -5,8 +5,8 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import { ProjectProvider } from './context/ProjectContext';
+import { UserProvider } from './context/UserContext';
 import './global.css';
-import { HeaderTitle } from '@react-navigation/elements';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -20,25 +20,27 @@ export default function RootLayout() {
   }
 
   return (
-    <ProjectProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack  screenOptions={{
-            headerTitle: "", // Hide title, show back arrow
-           // Hide back text on iOS
-          }}
+    <UserProvider>
+      <ProjectProvider>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <Stack  screenOptions={{
+              headerTitle: "", // Hide title, show back arrow
+             // Hide back text on iOS
+            }}
      >
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="Slider" options={{ headerShown: false }} />
-         <Stack.Screen name="Goals" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="Slider" options={{ headerShown: false }} />
+           <Stack.Screen name="Goals" options={{ headerShown: false }} />
 <Stack.Screen name="billing" options={{ headerShown: false }} />
 <Stack.Screen name="inbox" options={{ headerShown: false }} />
 <Stack.Screen name="projects" options={{ headerShown: false }} />
 <Stack.Screen name="home" options={{ headerShown: false }} />
 <Stack.Screen name="creator" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
-    </ProjectProvider>
+            <Stack.Screen name="+not-found" />
+          </Stack>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </ProjectProvider>
+    </UserProvider>
   );
 }
