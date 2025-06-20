@@ -264,6 +264,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
+    marginBottom:50,
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: '#e6e6e6',
@@ -278,6 +279,7 @@ const styles = StyleSheet.create({
     borderColor: '#e6e6e6',
     borderRadius: 8,
     padding: 10,
+ 
     fontSize: 16,
     backgroundColor: '#f7faff',
     marginRight: 10,

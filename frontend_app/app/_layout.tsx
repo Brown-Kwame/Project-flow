@@ -25,7 +25,7 @@ export default function RootLayout() {
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <Stack  screenOptions={{
               headerTitle: "", // Hide title, show back arrow
-             // Hide back text on iOS
+             headerShown:false// Hide back text on iOS
             }}
      >
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
