@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: eurekaserver
+# File: application.yml
+# Path: your-eureka-server-project/src/main/resources/application.yml
+
+server:
+  port: 8761 # Default Eureka Server port. This is where clients will connect.
+
+eureka:
+  client:
+    # Eureka server does not need to register itself with Eureka
+    register-with-eureka: false
+    # Eureka server does not need to fetch registry from Eureka
+    fetch-registry: false
+    serviceUrl:
+      defaultZone: http://localhost:${server.port}/eureka/ # Its own URL
+  instance:
+    hostname: localhost # Hostname for the Eureka server
