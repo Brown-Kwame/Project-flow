@@ -1,0 +1,58 @@
+# File: application.yml
+# Path: your-api-gateway-project/src/main/resources/application.yml
+
+server:
+  port: 8080 # The default port for the API Gateway. All client requests will hit this.
+
+spring:
+  application:
+    name: api-gateway # The name of this service, used by Eureka
+  cloud:
+    gateway:
+      routes:
+        # Route for User Service
+        - id: user-service
+          uri: lb://USER-SERVICE # 'lb://' indicates load-balancing via Eureka Service ID
+          predicates:
+            - Path=/users/** # Matches any request starting with /users/
+          filters:
+            - RewritePath=/users/(?<segment>.*), /users/${segment} # Rewrites /users/xyz to /users/xyz for the target service
+
+        # Route for Notification Service
+        - id: notification-service
+          uri: lb://NOTIFICATION-SERVICE
+          predicates:
+            - Path=/notifications/**
+          filters:
+            - RewritePath=/notifications/(?<segment>.*), /notifications/${segment}
+
+        # Route for Task Service
+        - id: task-service
+          uri: lb://TASK-SERVICE
+          predicates:
+            - Path=/tasks/**
+          filters:
+            - RewritePath=/tasks/(?<segment>.*), /tasks/${segment}
+
+        # Route for Project Service
+        - id: project-service
+          uri: lb://PROJECT-SERVICE
+          predicates:
+            - Path=/projects/**
+          filters:
+            - RewritePath=/projects/(?<segment>.*), /projects/${segment}
+
+        # Route for Goals Service
+        - id: goals-service
+          uri: lb://GOALS-SERVICE
+          predicates:
+            - Path=/goals/**
+          filters:
+            - RewritePath=/goals/(?<segment>.*), /goals/${segment}
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/ # Address of your Eureka Server
+  instance:
+    hostname: localhost
