@@ -65,7 +65,7 @@ const Billing = () => {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Payment Method</Text>
           <Text style={styles.cardValue}>{apiData?.paymentMethod || 'Visa **** 1234'}</Text>
-          <Text style={styles.cardDesc}>Exp. 12/28</Text>
+          <Text style={styles.cardDesc} >Exp. 12/28</Text>
         </View>
       </View>
       <View style={styles.upgradeSection}>

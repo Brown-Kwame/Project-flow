@@ -6,7 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import { ProjectProvider } from './context/ProjectContext';
 import { UserProvider } from './context/UserContext';
-
+import './global.css'
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
