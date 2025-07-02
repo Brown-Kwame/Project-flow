@@ -3,6 +3,7 @@
   "compilerOptions": {
     "strict": true,
     "allowJs": true,
+    // "checkJs": true, // Uncomment if you want to type-check JS/JSX files
     "paths": {
       "@/*": [
         "./*"
@@ -14,10 +15,6 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
-    "nativewind-env.d.ts",
-    "app/components/HomeUi.jsx",
-    "app/dashboard/Dashboard.jsx",
-    "app/(tabs)/index.jsx",
-    "app/(tabs)/explore.jsx"
+    "nativewind-env.d.ts"
   ]
 }

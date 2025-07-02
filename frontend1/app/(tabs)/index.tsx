@@ -2,7 +2,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Link, useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import { Animated, Dimensions, ScrollView, StyleSheet, Text, View,Image } from 'react-native';
-import HomeCard from '../../../frontend1/app/components/HomeCard';
+import HomeCard from '../components/HomeCard';
 
 const CARD_COLORS = [
   { bg: '#f7faff', iconBg: '#668cff22', icon: '#668cff' }, // Projects
@@ -109,13 +109,13 @@ const Index = () => {
             {rows.map((row, i) => (
               <View style={styles.row} key={i}>
                 {row.map((card) => (
-                  <Link href={card.link } asChild key={card.title}>
+                  <Link href={card.link as any} asChild key={card.title}>
                     <HomeCard
                       title={card.title}
                       subtitle={card.subtitle}
                       icon={card.icon}
                       color={card.color}
-                      onPress={() => router.push(card.link)}
+                      onPress={() => router.push(card.link as any)}
                     />
                   </Link>
                 ))}
