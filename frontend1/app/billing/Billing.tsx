@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const fetchPlanApi = async () => {
   // Example: Use a free API for random plan features (mock)
@@ -58,7 +58,7 @@ const Billing = () => {
           </View>
         </View>
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Next Payment</Text>
+          <Text style={styles.cardTitle} className='text-yellow-400'>Next Payment</Text>
           <Text style={styles.cardValue}>{apiData?.nextPayment || '2025-07-01'}</Text>
           <Text style={styles.cardDesc}>Billed annually</Text>
         </View>
