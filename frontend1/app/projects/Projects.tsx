@@ -4,7 +4,7 @@ import { ActivityIndicator, FlatList, Modal, Pressable, StyleSheet, Text, TextIn
 import { useProjectContext } from '../context/ProjectContext';
 
 const Projects = () => {
-  const { projects, loading, error, addProject, updateProject, deleteProject } = useProjectContext();
+  const { projects, loading,addProject, updateProject, deleteProject } = useProjectContext();
   const [modalVisible, setModalVisible] = useState(false);
   const [newProject, setNewProject] = useState({ name: '', status: '', description: '', owner: '' });
   const [adding, setAdding] = useState(false);
@@ -74,7 +74,6 @@ const Projects = () => {
         onChangeText={setSearch}
       />
       {loading && <ActivityIndicator size="large" color="#668cff" style={{ marginTop: 20 }} />}
-      {error && <Text style={{ color: 'red', margin: 20 }}>{error}</Text>}
       <FlatList
         data={filteredProjects}
         keyExtractor={item => item.id}

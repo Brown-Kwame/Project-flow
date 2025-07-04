@@ -2,6 +2,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useRouter } from 'expo-router';
 
 const PROFILE_STORAGE_KEY = 'asana_profile';
 const DEFAULT_PROFILE = {
@@ -13,6 +14,7 @@ const DEFAULT_PROFILE = {
 
 const HEADER_IMAGE = require('../../assets/images/explore.webp');
 const fallbackImage = require('../../assets/images/home2.webp');
+const router = useRouter();
 
 const Explore = () => {
   const [profile, setProfile] = useState(DEFAULT_PROFILE);
@@ -199,10 +201,17 @@ const Explore = () => {
             <FontAwesome name="lock" size={16} color="#fff" />
             <Text style={styles.actionBtnText}>Change Password</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionBtnFull}>
-            <FontAwesome name="sign-out" size={16} color="#fff" />
-            <Text style={styles.actionBtnText}>Log Out</Text>
-          </TouchableOpacity>
+         <TouchableOpacity
+  style={styles.actionBtnFull}
+  onPress={async () => {
+    await AsyncStorage.clear(); // Optional: clear stored profile/settings
+    router.replace('/(auth)/AuthScreen');   // Navigate to AuthScreen
+  }}
+>
+  <FontAwesome name="sign-out" size={16} color="#fff" />
+  <Text style={styles.actionBtnText}>Log Out</Text>
+</TouchableOpacity>
+
           <TouchableOpacity style={styles.actionBtnFull}>
             <FontAwesome name="trash" size={16} color="#fff" />
             <Text style={styles.actionBtnText}>Delete Account</Text>
