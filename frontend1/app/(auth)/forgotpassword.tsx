@@ -18,7 +18,6 @@ export default function ForgotPasswordScreen() {
 
       {/* Content */}
       <View style={styles.content}>
-        <Text style={styles.brand}>asana</Text>
 
         {/* Title & Subtitle */}
         <Text style={styles.title}>Forgot Password</Text>

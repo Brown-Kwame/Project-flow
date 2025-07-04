@@ -47,7 +47,7 @@ const CreateAccount = () => {
         <TextInput
           style={styles.input}
           placeholder="Enter your full name"
-          placeholderTextColor="#aaa"
+          placeholderTextColor="#666"
           value={fullName}
           onChangeText={setFullName}
           autoCapitalize="words"
@@ -57,7 +57,7 @@ const CreateAccount = () => {
         <TextInput
           style={styles.input}
           placeholder="Enter your email"
-          placeholderTextColor="#aaa"
+          placeholderTextColor="#666"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
@@ -68,7 +68,7 @@ const CreateAccount = () => {
         <TextInput
           style={styles.input}
           placeholder="Enter your password"
-          placeholderTextColor="#aaa"
+          placeholderTextColor="#666"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -78,7 +78,7 @@ const CreateAccount = () => {
         <TextInput
           style={styles.input}
           placeholder="Confirm your password"
-          placeholderTextColor="#aaa"
+          placeholderTextColor="#666"
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry
@@ -106,17 +106,17 @@ export default CreateAccount;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1B1D26', // Dark background
+    backgroundColor: '#ffffff', // Changed to white
     justifyContent: 'center',
     alignItems: 'center',
   },
   form: {
     width: '90%',
     maxWidth: 400,
-    backgroundColor: '#2A2C35', // Slightly lighter card
+    backgroundColor: '#f2f2f2', // Light grey card
     borderRadius: 18,
     padding: 28,
-    shadowColor: '#668cff',
+    shadowColor: '#ccc',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
@@ -125,24 +125,24 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#000', // Black text
     marginBottom: 24,
     alignSelf: 'center',
   },
   label: {
-    color: '#ccc',
+    color: '#000', // Black text
     fontSize: 15,
     marginTop: 12,
     marginBottom: 4,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#444',
+    borderColor: '#ccc',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#1f212b',
-    color: '#fff',
+    backgroundColor: '#fff',
+    color: '#000',
     marginBottom: 2,
   },
   signupBtn: {
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   loginText: {
-    color: '#bbb',
+    color: '#444', // Dark text
     fontSize: 15,
   },
   loginTextBold: {

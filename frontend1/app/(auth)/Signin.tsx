@@ -1,30 +1,62 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, SafeAreaView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  SafeAreaView,
+} from 'react-native';
 import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons'; // Added for back button icon
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
+
+  useEffect(() => {
+    const loadCredentials = async () => {
+      const savedEmail = await AsyncStorage.getItem('email');
+      const savedPassword = await AsyncStorage.getItem('password');
+      if (savedEmail && savedPassword) {
+        setEmail(savedEmail);
+        setPassword(savedPassword);
+        setRememberMe(true);
+      }
+    };
+    loadCredentials();
+  }, []);
+
+  const handleLogin = async () => {
+    if (rememberMe) {
+      await AsyncStorage.setItem('email', email);
+      await AsyncStorage.setItem('password', password);
+    } else {
+      await AsyncStorage.removeItem('email');
+      await AsyncStorage.removeItem('password');
+    }
+
+    router.push('/(auth)/Billing'); // simulate successful login
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       {/* Back Button */}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.backButton}
-        onPress={() => router.push('/(auth)/CreateAccount')} // direct to authhome
+        onPress={() => router.push('/(auth)/CreateAccount')}
       >
         <Ionicons name="chevron-back" size={24} color="#c0392b" />
       </TouchableOpacity>
 
-    
-
-      <Text style={styles.brand}>asana</Text>
-
-      {/* Welcome */}
       <Text style={styles.welcome}>Welcome to Asana</Text>
       <Text style={styles.subtitle}>To get started, please sign in</Text>
 
-      {/* Section Title */}
       <Text style={styles.sectionTitle}>Log in to your account</Text>
       <Text style={styles.sectionSubtitle}>Welcome back! Select method to log in:</Text>
 
@@ -35,7 +67,9 @@ export default function LoginScreen() {
         </TouchableOpacity>
         <TouchableOpacity style={styles.socialBtn}>
           <Image
-            source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png' }}
+            source={{
+              uri: 'https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png',
+            }}
             style={styles.socialIcon}
           />
           <Text style={styles.socialText}>Facebook</Text>
@@ -48,17 +82,19 @@ export default function LoginScreen() {
         <View style={styles.divider} />
       </View>
 
-      {/* Email Input */}
+      {/* Email */}
       <View style={styles.inputRow}>
         <Text style={styles.inputIcon}>✉️</Text>
         <TextInput
           style={styles.input}
           placeholder="Email"
           placeholderTextColor="#bbb"
+          value={email}
+          onChangeText={setEmail}
         />
       </View>
 
-      {/* Password Input */}
+      {/* Password */}
       <View style={styles.inputRow}>
         <Text style={styles.inputIcon}>🔒</Text>
         <TextInput
@@ -66,31 +102,30 @@ export default function LoginScreen() {
           placeholder="Password"
           placeholderTextColor="#bbb"
           secureTextEntry={!showPassword}
+          value={password}
+          onChangeText={setPassword}
         />
         <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
           <Text style={styles.eyeIcon}>{showPassword ? '🙈' : '👁️'}</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Links */}
+      {/* Remember Me + Forgot */}
       <View style={styles.linksRow}>
-        <TouchableOpacity>
-          <Text style={styles.link}>Remember me</Text>
+        <TouchableOpacity onPress={() => setRememberMe(!rememberMe)}>
+          <Text style={styles.link}>{rememberMe ? '✅ ' : '⬜️ '}Remember me</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => router.push('/(auth)/forgotpassword')}>
           <Text style={styles.link}>Forgot Password?</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Login Button */}
-      <TouchableOpacity
-        style={styles.loginBtn}
-        onPress={() => router.push('/(auth)/Billing')} // direct to Billing
-      >
+      {/* Login */}
+      <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
         <Text style={styles.loginBtnText}>Log in</Text>
       </TouchableOpacity>
 
-      {/* Signup Link */}
+      {/* Signup */}
       <Text style={styles.signupText}>
         Don't have an account?{' '}
         <Text
@@ -101,20 +136,30 @@ export default function LoginScreen() {
         </Text>
       </Text>
 
-      {/* Terms */}
-    <Text style={styles.terms}>
-  By signing up, I agree to the Asana Privacy policy and{'\n'}
-  <Text style={{ textDecorationLine: 'underline' }}>Terms of Services</Text>
-</Text>
+      {/* Terms and Conditions */}
+      <Text style={styles.terms}>
+        By signing up, I agree to the Asana Privacy policy and{'\n'}
+        <Text style={styles.termsLink} onPress={() => setShowTerms(!showTerms)}>
+          Terms of Services {showTerms ? '▲' : '▼'}
+        </Text>
+      </Text>
 
+      {showTerms && (
+        <View style={styles.termsBox}>
+          <Text style={styles.termsContent}>
+            These terms explain how we collect, use, and store your data. By using this app,
+            you agree to not misuse the platform, protect your credentials, and follow local laws.
+            Refer to our full documentation for legal details and compliance policies.
+          </Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1B1D26',
+    backgroundColor: '#fff',
     alignItems: 'center',
     padding: 20,
     justifyContent: 'center',
@@ -125,29 +170,16 @@ const styles = StyleSheet.create({
     left: 20,
     zIndex: 1,
   },
-  logo: {
-    width: 70,
-    height: 70,
-    marginBottom: 0,
-  },
-  brand: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#FF5A5F',
-    marginBottom: 10,
-    marginTop: -10,
-    letterSpacing: 1,
-  },
   welcome: {
     fontSize: 24,
     fontWeight: 'bold',
     marginTop: 10,
-    color: '#fff',
+    color: '#000',
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: '#aaa',
+    color: '#444',
     marginBottom: 10,
     textAlign: 'center',
     textDecorationLine: 'underline',
@@ -156,13 +188,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 10,
-    color: '#fff',
+    color: '#000',
     textAlign: 'center',
     textDecorationLine: 'underline',
   },
   sectionSubtitle: {
     fontSize: 13,
-    color: '#bbb',
+    color: '#666',
     marginBottom: 14,
     textAlign: 'center',
   },
@@ -175,13 +207,13 @@ const styles = StyleSheet.create({
   socialBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#2D2F3A',
+    backgroundColor: '#f1f1f1',
     borderRadius: 8,
     paddingVertical: 8,
     paddingHorizontal: 18,
     marginHorizontal: 5,
     borderWidth: 1,
-    borderColor: '#3E404B',
+    borderColor: '#ccc',
   },
   socialIcon: {
     width: 22,
@@ -190,7 +222,7 @@ const styles = StyleSheet.create({
   },
   socialText: {
     fontSize: 15,
-    color: '#fff',
+    color: '#000',
     fontWeight: '500',
   },
   dividerRow: {
@@ -203,38 +235,40 @@ const styles = StyleSheet.create({
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: '#555',
+    backgroundColor: '#ccc',
     marginHorizontal: 8,
   },
   dividerText: {
-    color: '#999',
+    color: '#666',
     fontSize: 13,
   },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#2A2C35',
+    backgroundColor: '#f9f9f9',
     borderRadius: 8,
     marginBottom: 12,
     paddingHorizontal: 12,
     width: '100%',
     maxWidth: 350,
     height: 48,
+    borderWidth: 1,
+    borderColor: '#ccc',
   },
   inputIcon: {
     fontSize: 18,
     marginRight: 8,
-    color: '#888',
+    color: '#666',
   },
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#fff',
+    color: '#000',
   },
   eyeIcon: {
     fontSize: 18,
     marginLeft: 8,
-    color: '#888',
+    color: '#666',
   },
   linksRow: {
     flexDirection: 'row',
@@ -244,12 +278,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   link: {
-    color: '#4E8AFE',
+    color: '#007bff',
     fontSize: 13,
     textDecorationLine: 'underline',
   },
   loginBtn: {
-    backgroundColor: '#4E8AFE',
+    backgroundColor: '#007bff',
     borderRadius: 8,
     paddingVertical: 14,
     width: '100%',
@@ -264,14 +298,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   signupText: {
-    color: '#bbb',
+    color: '#555',
     fontSize: 13,
     marginTop: 4,
     marginBottom: 10,
     textAlign: 'center',
   },
   signupLink: {
-    color: '#4E8AFE',
+    color: '#007bff',
     textDecorationLine: 'underline',
     fontWeight: 'bold',
   },
@@ -280,5 +314,24 @@ const styles = StyleSheet.create({
     fontSize: 11,
     textAlign: 'center',
     marginTop: 10,
+  },
+  termsLink: {
+    textDecorationLine: 'underline',
+    color: '#007bff',
+    fontWeight: '600',
+  },
+  termsBox: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 8,
+    maxWidth: 350,
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  termsContent: {
+    color: '#333',
+    fontSize: 12,
+    lineHeight: 18,
   },
 });

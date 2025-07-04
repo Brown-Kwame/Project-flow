@@ -30,6 +30,7 @@ const Explore = () => {
   const [inviteName, setInviteName] = useState('');
   const [inviteModal, setInviteModal] = useState(false);
   const [inviteError, setInviteError] = useState('');
+const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
 
   // Load profile from AsyncStorage
   useEffect(() => {
@@ -197,10 +198,14 @@ const Explore = () => {
         {/* Common settings actions */}
         <View style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>Actions</Text>
-          <TouchableOpacity style={styles.actionBtnFull}>
-            <FontAwesome name="lock" size={16} color="#fff" />
-            <Text style={styles.actionBtnText}>Change Password</Text>
-          </TouchableOpacity>
+          <TouchableOpacity
+  style={styles.actionBtnFull}
+  onPress={() => router.push('/(auth)/changepass')} // Adjust path if needed
+>
+  <FontAwesome name="lock" size={16} color="#fff" />
+  <Text style={styles.actionBtnText}>Change Password</Text>
+</TouchableOpacity>
+
          <TouchableOpacity
   style={styles.actionBtnFull}
   onPress={async () => {
@@ -212,10 +217,14 @@ const Explore = () => {
   <Text style={styles.actionBtnText}>Log Out</Text>
 </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionBtnFull}>
-            <FontAwesome name="trash" size={16} color="#fff" />
-            <Text style={styles.actionBtnText}>Delete Account</Text>
-          </TouchableOpacity>
+          <TouchableOpacity
+  style={styles.actionBtnFull}
+  onPress={() => setDeleteConfirmVisible(true)}
+>
+  <FontAwesome name="trash" size={16} color="#fff" />
+  <Text style={styles.actionBtnText}>Delete Account</Text>
+</TouchableOpacity>
+
         </View>
       </ScrollView>
       {/* Modal for editing profile */}
@@ -250,6 +259,43 @@ const Explore = () => {
           </View>
         </View>
       </Modal>
+      <Modal visible={deleteConfirmVisible} animationType="fade" transparent>
+  <View style={styles.modalOverlay}>
+    <View style={styles.modalContent}>
+      <Text style={styles.modalTitle}>Delete Account</Text>
+      <Text style={{ fontSize: 16, color: '#444', marginBottom: 16 }}>
+        Are you sure you want to delete your account? This action cannot be undone.
+      </Text>
+      <View style={styles.modalActions}>
+        <TouchableOpacity onPress={() => setDeleteConfirmVisible(false)} style={styles.cancelBtn}>
+          <Text style={{ color: '#668cff', fontWeight: 'bold' }}>Cancel</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={async () => {
+            // Clear teammates
+            setTeammates([]);
+
+            // Reset profile
+            const reset = {
+              ...DEFAULT_PROFILE,
+              name: '',
+              email: '',
+            };
+            await AsyncStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(reset));
+            setProfile(reset);
+
+            // Close modal
+            setDeleteConfirmVisible(false);
+          }}
+          style={styles.saveBtn}
+        >
+          <Text style={{ color: '#fff', fontWeight: 'bold' }}>Yes, Delete</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </View>
+</Modal>
+
       {/* Invite Modal */}
       <Modal visible={inviteModal} animationType="fade" transparent>
         <View style={styles.modalOverlay}>
