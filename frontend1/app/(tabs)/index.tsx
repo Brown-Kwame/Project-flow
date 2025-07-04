@@ -1,17 +1,26 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Link, useRouter } from 'expo-router';
-import React, { useRef, useState } from 'react';
-import { Animated, Dimensions, ScrollView, StyleSheet, Text, View,Image } from 'react-native';
+import React, { useRef, useEffect, useState } from 'react';
+import {
+  Animated,
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  Easing,
+} from 'react-native';
 import HomeCard from '../components/HomeCard';
 
 const CARD_COLORS = [
-  { bg: '#f7faff', iconBg: '#668cff22', icon: '#668cff' }, // Projects
-  { bg: '#fff7f0', iconBg: '#ffb34722', icon: '#ffb347' }, // Tasks
-  { bg: '#f0f7ff', iconBg: '#e600ac22', icon: '#e600ac' }, // Dashboard
-  { bg: '#f7fff7', iconBg: '#4caf5022', icon: '#4caf50' }, // Goals
-  { bg: '#fff0f7', iconBg: '#f20d6922', icon: '#f20d69' }, // Billing
-  { bg: '#f0f0ff', iconBg: '#b3000022', icon: '#b30000' }, // Inbox
-  { bg: '#f0fff7', iconBg: '#00bfae22', icon: '#00bfae' }, // Create
+  { bg: '#f7faff', iconBg: '#668cff22', icon: '#668cff' },
+  { bg: '#fff7f0', iconBg: '#ffb34722', icon: '#ffb347' },
+  { bg: '#f0f7ff', iconBg: '#e600ac22', icon: '#e600ac' },
+  { bg: '#f7fff7', iconBg: '#4caf5022', icon: '#4caf50' },
+  { bg: '#fff0f7', iconBg: '#f20d6922', icon: '#f20d69' },
+  { bg: '#f0f0ff', iconBg: '#b3000022', icon: '#b30000' },
+  { bg: '#f0fff7', iconBg: '#00bfae22', icon: '#00bfae' },
 ];
 
 const cardData = [
@@ -48,7 +57,7 @@ const cardData = [
     subtitle: 'Manage your plan',
     icon: 'money',
     color: CARD_COLORS[4],
-    link: '/billing/Billing',
+    link: '/(auth)/Billing',
   },
   {
     title: 'Inbox',
@@ -67,28 +76,28 @@ const cardData = [
 ];
 
 const Index = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const slideAnim = useRef(new Animated.Value(-300)).current;
   const router = useRouter();
 
-  const toggleDropdown = () => {
-    if (!isOpen) {
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      Animated.timing(slideAnim, {
-        toValue: -300,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    }
-    setIsOpen(!isOpen);
-  };
+  // Animation states
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.95)).current;
 
-  // Responsive: 2 columns on mobile, 3 on large screens
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        friction: 6,
+        tension: 50,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
   const numColumns = Dimensions.get('window').width > 600 ? 3 : 2;
   const rows = [];
   for (let i = 0; i < cardData.length; i += numColumns) {
@@ -98,13 +107,23 @@ const Index = () => {
   return (
     <View style={styles.container1}>
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-        {/* Slider overlay */}
-      
-        <View style={styles.container2}>
+        <Animated.View
+          style={[
+            styles.container2,
+            {
+              opacity: fadeAnim,
+              transform: [{ scale: scaleAnim }],
+            },
+          ]}
+        >
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 30 }}>
-            <Image source={require('../../assets/images/Icon.png')} style={{ width: 32, height: 32, marginRight: 12 }} />
+            <Image
+              source={require('../../assets/images/Icon.png')}
+              style={{ width: 32, height: 32, marginRight: 12 }}
+            />
             <Text style={styles.heading}>Pro Team</Text>
           </View>
+
           <View style={styles.grid}>
             {rows.map((row, i) => (
               <View style={styles.row} key={i}>
@@ -122,7 +141,7 @@ const Index = () => {
               </View>
             ))}
           </View>
-        </View>
+        </Animated.View>
       </ScrollView>
     </View>
   );
@@ -148,12 +167,6 @@ const styles = StyleSheet.create({
     color: '#222',
     marginLeft: 16,
   },
-  icon: {
-    marginRight: 0,
-    padding: 8,
-    borderRadius: 100,
-    backgroundColor: '#e6e6e6',
-  },
   grid: {
     flexDirection: 'column',
     flexWrap: 'wrap',
@@ -164,15 +177,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     width: '100%',
-  },
-  sliderOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: 250,
-    height: '100%',
-    backgroundColor: 'white',
-    zIndex: 100,
-    elevation: 10,
   },
 });

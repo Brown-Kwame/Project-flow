@@ -1,7 +1,16 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import { router } from 'expo-router';
 
-const CreateAccount = ({ onLogin, onSignup }) => {
+const CreateAccount = () => {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,53 +27,74 @@ const CreateAccount = ({ onLogin, onSignup }) => {
       setError('Passwords do not match.');
       return;
     }
-    // Pass data to parent or context
-    if (onSignup) onSignup({ fullName, email, password });
+    alert('Account created successfully!');
+    // router.push('/(auth)/login');
+  };
+
+  const handleLoginLink = () => {
+    router.push('/(auth)/Signin');
   };
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <View style={styles.form}>
         <Text style={styles.title}>Create Account</Text>
+
         <Text style={styles.label}>Full Name</Text>
         <TextInput
           style={styles.input}
           placeholder="Enter your full name"
+          placeholderTextColor="#aaa"
           value={fullName}
           onChangeText={setFullName}
           autoCapitalize="words"
         />
+
         <Text style={styles.label}>Email</Text>
         <TextInput
           style={styles.input}
           placeholder="Enter your email"
+          placeholderTextColor="#aaa"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
         />
+
         <Text style={styles.label}>Password</Text>
         <TextInput
           style={styles.input}
           placeholder="Enter your password"
+          placeholderTextColor="#aaa"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
         />
+
         <Text style={styles.label}>Confirm Password</Text>
         <TextInput
           style={styles.input}
           placeholder="Confirm your password"
+          placeholderTextColor="#aaa"
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry
         />
+
         {error ? <Text style={styles.error}>{error}</Text> : null}
+
         <TouchableOpacity style={styles.signupBtn} onPress={handleSignup}>
           <Text style={styles.signupBtnText}>Sign Up</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.loginLink} onPress={onLogin}>
-          <Text style={styles.loginText}>Already have an account? <Text style={styles.loginTextBold}>Login</Text></Text>
+
+        <TouchableOpacity style={styles.loginLink} onPress={handleLoginLink}>
+          <Text style={styles.loginText}>
+            Already have an account?{' '}
+            <Text style={styles.loginTextBold}>Login</Text>
+          </Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -76,42 +106,43 @@ export default CreateAccount;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f7faff',
+    backgroundColor: '#1B1D26', // Dark background
     justifyContent: 'center',
     alignItems: 'center',
   },
   form: {
     width: '90%',
     maxWidth: 400,
-    backgroundColor: '#fff',
+    backgroundColor: '#2A2C35', // Slightly lighter card
     borderRadius: 18,
     padding: 28,
     shadowColor: '#668cff',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#222',
+    color: '#fff',
     marginBottom: 24,
     alignSelf: 'center',
   },
   label: {
-    color: '#888',
+    color: '#ccc',
     fontSize: 15,
     marginTop: 12,
     marginBottom: 4,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#e6e6e6',
+    borderColor: '#444',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#f7faff',
+    backgroundColor: '#1f212b',
+    color: '#fff',
     marginBottom: 2,
   },
   signupBtn: {
@@ -123,7 +154,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     shadowColor: '#668cff',
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 2,
   },
@@ -137,7 +168,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   loginText: {
-    color: '#888',
+    color: '#bbb',
     fontSize: 15,
   },
   loginTextBold: {
