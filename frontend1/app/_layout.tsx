@@ -9,7 +9,7 @@ import { UserProvider, useUser } from './context/UserContext';
 import '../global.css'
 function AppNavigator() {
   const { isAuthenticated } = useUser();
-  // When not authenticated, only show auth screens (Signin is always first)
+  // When not authenticated, only show auth screens (Signin is always first
   if (!isAuthenticated) {
     return (
       <Stack screenOptions={{ headerTitle: '', headerShown: false }}>
@@ -64,4 +64,3 @@ export default function RootLayout() {
     </UserProvider>
   );
 }
-//comment
