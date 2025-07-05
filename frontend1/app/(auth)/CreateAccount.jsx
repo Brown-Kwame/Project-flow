@@ -86,7 +86,7 @@ const CreateAccount = () => {
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <TouchableOpacity style={styles.signupBtn} onPress={handleSignup}>
+        <TouchableOpacity style={styles.signupBtn} onPress={() => router.push('/(auth)/Billing')}>
           <Text style={styles.signupBtnText}>Sign Up</Text>
         </TouchableOpacity>
 

@@ -131,7 +131,7 @@ export default function PricingScreen() {
         </View>
         <Text style={styles.billingText}>billed {isAnnual ? 'yearly' : 'monthly'}</Text>
 
-        <TouchableOpacity style={styles.subscribeButton} onPress={handleSubscribe}>
+        <TouchableOpacity style={styles.subscribeButton}onPress={() => router.push('/(auth)/pricing')}>
           <Text style={styles.subscribeButtonText}>SUBSCRIBE</Text>
         </TouchableOpacity>
 

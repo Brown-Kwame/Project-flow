@@ -269,12 +269,13 @@ export default function AuthScreen() {
 }
 
 const styles = StyleSheet.create({
-  scroll: { backgroundColor: '#000' },
-  container: {
-    alignItems: 'center',
-    paddingBottom: 40,
-    backgroundColor: '#000',
-  },
+  scroll: { backgroundColor: '#fff' },
+container: {
+  alignItems: 'center',
+  paddingBottom: 40,
+  backgroundColor: '#fff',
+},
+
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -327,7 +328,7 @@ brand: {
 },
   tagline: {
     fontSize: 13,
-    color: '#ddd',
+    color: '#333',
     textAlign: 'center',
     marginBottom: 10,
     marginHorizontal: 20,
@@ -358,7 +359,7 @@ brand: {
     marginHorizontal: 4,
   },
   section: {
-    backgroundColor: '#111',
+    backgroundColor: '#f9f9f9',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -375,7 +376,7 @@ brand: {
   },
   sectionText: {
     fontSize: 13,
-    color: '#ccc',
+    color: '#444',
     marginBottom: 8,
     textAlign: 'center',
   },
@@ -400,7 +401,7 @@ brand: {
     alignSelf: 'center',
   },
   collabBox: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#f2f2f2',
     borderRadius: 12,
     padding: 20,
     marginHorizontal: 16,
@@ -435,13 +436,13 @@ brand: {
   collabText: {
     fontWeight: 'bold',
     fontSize: 16,
-    color: '#fff',
+    color: '#222',
     textAlign: 'center',
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: '#222',
+    backgroundColor: '#f2f2f2',
     borderRadius: 12,
     padding: 16,
     marginTop: 12,
@@ -459,20 +460,13 @@ brand: {
     fontSize: 15,
     marginBottom: 6,
   },
-  footerLabel: {
-    color: '#ddd',
-    fontSize: 13,
-    marginBottom: 4,
-  },
-  footerInput: {
-    backgroundColor: '#333',
-    borderRadius: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    marginBottom: 6,
-    fontSize: 14,
-    color: '#fff',
-  },
+ footerLabel: {
+  color: '#333', // was '#ddd'
+},
+ footerInput: {
+  backgroundColor: '#f2f2f2', // was '#333'
+  color: '#000',              // was '#fff'
+},
   footerButton: {
     backgroundColor: '#FF6B6B',
     borderRadius: 6,
@@ -486,11 +480,8 @@ brand: {
     fontSize: 14,
   },
   footerLink: {
-    color: '#ddd',
-    fontSize: 13,
-    marginBottom: 4,
-    textDecorationLine: 'underline',
-  },
+  color: '#444', // was '#ddd'
+},
   premiumLink: {
     color: '#FF6B6B',
     fontWeight: 'bold',
@@ -507,13 +498,10 @@ brand: {
     color: '#FF6B6B',
     marginLeft: 8,
   },
-  copyright: {
-    color: '#999',
-    fontSize: 12,
-    textAlign: 'center',
-    marginTop: 12,
-    marginBottom: 16,
-  },
+ copyright: {
+  color: '#555', // was '#999'
+},
+
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.7)',
@@ -521,7 +509,7 @@ brand: {
     alignItems: 'center',
   },
   languageList: {
-    backgroundColor: '#222',
+    backgroundColor: '#fff',
     borderRadius: 8,
     padding: 10,
     minWidth: 180,
@@ -533,6 +521,6 @@ brand: {
   },
   languageText: {
     fontSize: 16,
-    color: '#fff',
+    color: '#111',
   },
 });

@@ -16,6 +16,8 @@ const HEADER_IMAGE = require('../../assets/images/explore.webp');
 const fallbackImage = require('../../assets/images/home2.webp');
 const router = useRouter();
 
+
+
 const Explore = () => {
   const [profile, setProfile] = useState(DEFAULT_PROFILE);
   const [loading, setLoading] = useState(true);
@@ -23,6 +25,7 @@ const Explore = () => {
   const [editName, setEditName] = useState('');
   const [editEmail, setEditEmail] = useState('');
   const [saving, setSaving] = useState(false);
+  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   // Teammates CRUD state
   type Teammate = { id: number; name: string; img: any };
   const [teammates, setTeammates] = useState<Teammate[]>([]);
@@ -30,7 +33,6 @@ const Explore = () => {
   const [inviteName, setInviteName] = useState('');
   const [inviteModal, setInviteModal] = useState(false);
   const [inviteError, setInviteError] = useState('');
-const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
 
   // Load profile from AsyncStorage
   useEffect(() => {
@@ -193,7 +195,7 @@ const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
           <View style={styles.infoRow}><Text style={styles.label}>Notifications</Text><Text style={styles.value}>Enabled</Text></View>
           <View style={styles.infoRow}><Text style={styles.label}>Theme</Text><Text style={styles.value}>Light</Text></View>
           <View style={styles.infoRow}><Text style={styles.label}>Language</Text><Text style={styles.value}>English</Text></View>
-          <View style={styles.infoRow}><Text style={styles.label}>App Version</Text><Text style={styles.value}>1.0.0</Text></View>
+          <View style={styles.infoRow}><Text style={styles.label}>App Version</Text><Text style={styles.value}>12.0.0</Text></View>
         </View>
         {/* Common settings actions */}
         <View style={styles.sectionCard}>
@@ -217,7 +219,7 @@ const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   <Text style={styles.actionBtnText}>Log Out</Text>
 </TouchableOpacity>
 
-          <TouchableOpacity
+         <TouchableOpacity
   style={styles.actionBtnFull}
   onPress={() => setDeleteConfirmVisible(true)}
 >
