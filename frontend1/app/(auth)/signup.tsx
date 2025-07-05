@@ -19,32 +19,38 @@ const Signup = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useUser();
+const handleSignup = async () => {
+  setError('');
+  setLoading(true);
 
-  const handleSignup = async () => {
-    setError('');
-    setLoading(true);
-    if (!fullName || !email || !password || !confirmPassword) {
-      setError('All fields are required.');
-      setLoading(false);
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
-      setLoading(false);
-      return;
-    }
-    try {
-      await login({
-        name: fullName,
-        email,
-        plan: 'Pro',
-        profileImage: null,
-      });
-    } catch (e) {
-      setError('Signup failed. Please try again.');
-    }
+  if (!fullName || !email || !password || !confirmPassword) {
+    setError('All fields are required.');
     setLoading(false);
-  };
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    setError('Passwords do not match.');
+    setLoading(false);
+    return;
+  }
+
+  try {
+    await login({
+      name: fullName,
+      email,
+      plan: 'Pro',
+      profileImage: null,
+    });
+
+    // ✅ Navigate to Billing page after successful signup
+    router.replace('/(auth)/Billing');
+  } catch (e) {
+    setError('Signup failed. Please try again.');
+  }
+
+  setLoading(false);
+};
 
   const handleLoginLink = () => {
     router.push('/(auth)/Signin');
@@ -114,55 +120,55 @@ export default Signup;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1B1D26',
+    backgroundColor: '#fff', // changed from dark
     justifyContent: 'center',
     alignItems: 'center',
   },
   form: {
     width: '90%',
     maxWidth: 400,
-    backgroundColor: '#2A2C35',
+    backgroundColor: '#f9f9f9', // changed from dark
     borderRadius: 18,
     padding: 28,
-    shadowColor: '#668cff',
+    shadowColor: '#aaa',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 5,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#222', // changed from white
     marginBottom: 24,
     alignSelf: 'center',
   },
   label: {
-    color: '#ccc',
+    color: '#444', // changed from #ccc
     fontSize: 15,
     marginTop: 12,
     marginBottom: 4,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#444',
+    borderColor: '#ccc', // lighter border
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#1f212b',
-    color: '#fff',
+    backgroundColor: '#fff', // changed from dark
+    color: '#000', // text color black
     marginBottom: 2,
   },
   signupBtn: {
-    backgroundColor: '#668cff',
+    backgroundColor: '#007bff', // blue primary
     borderRadius: 8,
     paddingVertical: 14,
     alignItems: 'center',
     marginTop: 24,
     marginBottom: 8,
-    shadowColor: '#668cff',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.25,
+    shadowColor: '#007bff',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 2,
   },
@@ -176,18 +182,17 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   loginText: {
-    color: '#bbb',
+    color: '#666', // softer gray
     fontSize: 15,
   },
   loginTextBold: {
-    color: '#668cff',
+    color: '#007bff',
     fontWeight: 'bold',
   },
   error: {
-    color: '#ff4d4d',
+    color: '#d00',
     fontWeight: 'bold',
     marginTop: 10,
     textAlign: 'center',
   },
 });
-// This code defines a CreateAccount component for a React Native application.

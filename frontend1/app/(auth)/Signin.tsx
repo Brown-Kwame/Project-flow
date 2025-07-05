@@ -136,12 +136,18 @@ export default function LoginScreen() {
       </View>
 
       {/* Login */}
-      <TouchableOpacity style={styles.loginBtn} onPress={async () => {
-        await handleLogin();
-        if (!error && email && password) {
-          router.replace('/(tabs)'); // Use the correct route for the home page in tabs
-        }
-      }} disabled={loading}>
+    <TouchableOpacity
+  style={styles.loginBtn}
+  onPress={async () => {
+    await handleLogin();
+    if (!error && email && password) {
+      router.replace('/(tabs)'); // ✅ Navigate to tabs
+
+    }
+  }}
+  disabled={loading}
+>
+
         <Text style={styles.loginBtnText}>{loading ? 'Logging in...' : 'Log in'}</Text>
       </TouchableOpacity>
       {error ? <Text style={styles.error}>{error}</Text> : null}
