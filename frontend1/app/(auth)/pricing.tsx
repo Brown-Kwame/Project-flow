@@ -17,7 +17,7 @@ export default function BillingScreen() {
       Alert.alert('Credit Card', 'Redirecting to credit card payment...');
     }
   };
-
+//okay
   const handleBack = () => {
     router.push('/(auth)/Billing');
   };
