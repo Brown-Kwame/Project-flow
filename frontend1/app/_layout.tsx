@@ -14,6 +14,8 @@ function AppNavigator() {
     return (
       <Stack screenOptions={{ headerTitle: '', headerShown: false }}>
         {/* Signin is always the initial route for unauthenticated users */}
+       <Stack.Screen name="(auth)/AuthScreen" options={{ headerShown: false }} />
+
          <Stack.Screen name="(auth)/Signin" options={{ headerShown: false }} />
          <Stack.Screen name="(auth)/signup" options={{ headerShown: false }} />
          <Stack.Screen name="(auth)/forgotpassword" options={{ headerShown: false }} />
