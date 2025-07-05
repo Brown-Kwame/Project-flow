@@ -136,10 +136,19 @@ export default function LoginScreen() {
       </View>
 
       {/* Login */}
-      <TouchableOpacity style={styles.loginBtn} onPress={handleLogin} disabled={loading}>
+      <TouchableOpacity style={styles.loginBtn} onPress={async () => {
+        await handleLogin();
+        if (!error && email && password) {
+          router.replace('/(tabs)'); // Use the correct route for the home page in tabs
+        }
+      }} disabled={loading}>
         <Text style={styles.loginBtnText}>{loading ? 'Logging in...' : 'Log in'}</Text>
       </TouchableOpacity>
       {error ? <Text style={styles.error}>{error}</Text> : null}
+      {/* Manual link to index page in tabs */}
+      <TouchableOpacity style={styles.loginLink} onPress={() => router.replace('/(tabs)')}>
+        <Text style={styles.loginTextBold}>Go to Home (Index Page)</Text>
+      </TouchableOpacity>
 
       {/* Signup */}
       <Text style={styles.signupText}>
@@ -355,5 +364,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 10,
     textAlign: 'center',
+  },
+  loginLink: {
+    marginTop: 10,
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  loginTextBold: {
+    color: '#007bff',
+    fontWeight: 'bold',
+    fontSize: 16,
+    textDecorationLine: 'underline',
   },
 });
