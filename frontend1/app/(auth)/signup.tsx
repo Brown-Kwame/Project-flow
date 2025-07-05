@@ -9,38 +9,45 @@ import {
   Platform,
 } from 'react-native';
 import { router } from 'expo-router';
-import { useUser } from '../context/UserContext'; // Import useUser
+import { useUser } from '../context/UserContext';
 
-const CreateAccount = () => {
+const Signup = () => {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
-  const { login } = useUser(); // Get login from context
+  const [loading, setLoading] = useState(false);
+  const { login } = useUser();
 
   const handleSignup = async () => {
     setError('');
+    setLoading(true);
     if (!fullName || !email || !password || !confirmPassword) {
       setError('All fields are required.');
+      setLoading(false);
       return;
     }
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
+      setLoading(false);
       return;
     }
-    // Simulate signup (replace with real API call)
-    await login({
-      name: fullName,
-      email,
-      plan: 'Pro',
-      profileImage: null,
-    });
-    // No need to manually navigate; layout will switch to main app
+    try {
+      await login({
+        name: fullName,
+        email,
+        plan: 'Pro',
+        profileImage: null,
+      });
+    } catch (e) {
+      setError('Signup failed. Please try again.');
+    }
+    setLoading(false);
   };
 
   const handleLoginLink = () => {
-    router.push('/(auth)/CreateAccount');
+    router.push('/(auth)/Signin');
   };
 
   return (
@@ -50,7 +57,6 @@ const CreateAccount = () => {
     >
       <View style={styles.form}>
         <Text style={styles.title}>Create Account</Text>
-
         <Text style={styles.label}>Full Name</Text>
         <TextInput
           style={styles.input}
@@ -60,7 +66,6 @@ const CreateAccount = () => {
           onChangeText={setFullName}
           autoCapitalize="words"
         />
-
         <Text style={styles.label}>Email</Text>
         <TextInput
           style={styles.input}
@@ -71,7 +76,6 @@ const CreateAccount = () => {
           keyboardType="email-address"
           autoCapitalize="none"
         />
-
         <Text style={styles.label}>Password</Text>
         <TextInput
           style={styles.input}
@@ -81,7 +85,6 @@ const CreateAccount = () => {
           onChangeText={setPassword}
           secureTextEntry
         />
-
         <Text style={styles.label}>Confirm Password</Text>
         <TextInput
           style={styles.input}
@@ -91,13 +94,10 @@ const CreateAccount = () => {
           onChangeText={setConfirmPassword}
           secureTextEntry
         />
-
-        {error ? <Text style={styles.error}>{error}</Text> : null}
-
-        <TouchableOpacity style={styles.signupBtn} onPress={handleSignup}>
-          <Text style={styles.signupBtnText}>Sign Up</Text>
+        <TouchableOpacity style={styles.signupBtn} onPress={handleSignup} disabled={loading}>
+          <Text style={styles.signupBtnText}>{loading ? 'Signing up...' : 'Sign Up'}</Text>
         </TouchableOpacity>
-
+        {error ? <Text style={styles.error}>{error}</Text> : null}
         <TouchableOpacity style={styles.loginLink} onPress={handleLoginLink}>
           <Text style={styles.loginText}>
             Already have an account?{' '}
@@ -109,19 +109,19 @@ const CreateAccount = () => {
   );
 };
 
-export default CreateAccount;
+export default Signup;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1B1D26', // Dark background
+    backgroundColor: '#1B1D26',
     justifyContent: 'center',
     alignItems: 'center',
   },
   form: {
     width: '90%',
     maxWidth: 400,
-    backgroundColor: '#2A2C35', // Slightly lighter card
+    backgroundColor: '#2A2C35',
     borderRadius: 18,
     padding: 28,
     shadowColor: '#668cff',

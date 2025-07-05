@@ -19,6 +19,8 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useUser(); // Get login from context
 
   useEffect(() => {
@@ -35,21 +37,26 @@ export default function LoginScreen() {
   }, []);
 
   const handleLogin = async () => {
-    if (rememberMe) {
-      await AsyncStorage.setItem('email', email);
-      await AsyncStorage.setItem('password', password);
-    } else {
-      await AsyncStorage.removeItem('email');
-      await AsyncStorage.removeItem('password');
+    setError('');
+    setLoading(true);
+    try {
+      if (!email || !password) {
+        setError('Email and password are required.');
+        setLoading(false);
+        return;
+      }
+      // Simulate authentication (replace with real API call)
+      await login({
+        name: email.split('@')[0],
+        email,
+        plan: 'Pro',
+        profileImage: null,
+      });
+      // No need to manually navigate; layout will switch to main app
+    } catch (e) {
+      setError('Login failed. Please try again.');
     }
-    // Simulate authentication (replace with real API call)
-    await login({
-      name: email.split('@')[0],
-      email,
-      plan: 'Pro',
-      profileImage: null,
-    });
-    // No need to manually navigate; layout will switch to main app
+    setLoading(false);
   };
 
   return (
@@ -129,9 +136,10 @@ export default function LoginScreen() {
       </View>
 
       {/* Login */}
-      <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
-        <Text style={styles.loginBtnText}>Log in</Text>
+      <TouchableOpacity style={styles.loginBtn} onPress={handleLogin} disabled={loading}>
+        <Text style={styles.loginBtnText}>{loading ? 'Logging in...' : 'Log in'}</Text>
       </TouchableOpacity>
+      {error ? <Text style={styles.error}>{error}</Text> : null}
 
       {/* Signup */}
       <Text style={styles.signupText}>
@@ -341,5 +349,11 @@ const styles = StyleSheet.create({
     color: '#333',
     fontSize: 12,
     lineHeight: 18,
+  },
+  error: {
+    color: 'red',
+    fontSize: 14,
+    marginTop: 10,
+    textAlign: 'center',
   },
 });
