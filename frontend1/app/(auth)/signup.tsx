@@ -9,6 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import { router } from 'expo-router';
+import { useUser } from '../context/UserContext'; // Import useUser
 
 const CreateAccount = () => {
   const [fullName, setFullName] = useState('');
@@ -16,8 +17,9 @@ const CreateAccount = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const { login } = useUser(); // Get login from context
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     setError('');
     if (!fullName || !email || !password || !confirmPassword) {
       setError('All fields are required.');
@@ -27,8 +29,14 @@ const CreateAccount = () => {
       setError('Passwords do not match.');
       return;
     }
-    alert('Account created successfully!');
-    // router.push('/(auth)/login');
+    // Simulate signup (replace with real API call)
+    await login({
+      name: fullName,
+      email,
+      plan: 'Pro',
+      profileImage: null,
+    });
+    // No need to manually navigate; layout will switch to main app
   };
 
   const handleLoginLink = () => {

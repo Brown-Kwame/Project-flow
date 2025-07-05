@@ -11,6 +11,7 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useUser } from '../context/UserContext'; // Import useUser
 
 export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
@@ -18,6 +19,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const { login } = useUser(); // Get login from context
 
   useEffect(() => {
     const loadCredentials = async () => {
@@ -40,8 +42,14 @@ export default function LoginScreen() {
       await AsyncStorage.removeItem('email');
       await AsyncStorage.removeItem('password');
     }
-
-    router.push('/(auth)/Billing'); // simulate successful login
+    // Simulate authentication (replace with real API call)
+    await login({
+      name: email.split('@')[0],
+      email,
+      plan: 'Pro',
+      profileImage: null,
+    });
+    // No need to manually navigate; layout will switch to main app
   };
 
   return (

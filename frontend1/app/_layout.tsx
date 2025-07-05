@@ -5,8 +5,43 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import { ProjectProvider } from './context/ProjectContext';
-import { UserProvider } from './context/UserContext';
+import { UserProvider, useUser } from './context/UserContext';
 import '../global.css'
+function AppNavigator() {
+  const { isAuthenticated } = useUser();
+  // When not authenticated, only show auth screens (Signin is always first)
+  if (!isAuthenticated) {
+    return (
+      <Stack screenOptions={{ headerTitle: '', headerShown: false }}>
+        {/* Signin is always the initial route for unauthenticated users */}
+        <Stack.Screen name="(auth)/Signin" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)/signup" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)/forgotpassword" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)/CreateAccount" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)/changepass" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)/contact" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)/pricing" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)/AuthScreen" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)/Billing" options={{ headerShown: false }} />
+      </Stack>
+    );
+  }
+  // Main app screens only if authenticated
+  return (
+    <Stack screenOptions={{ headerTitle: '', headerShown: false }}>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="Slider/Slider" options={{ headerShown: false }} />
+      <Stack.Screen name="Goals/Goals" options={{ headerShown: false }} />
+      <Stack.Screen name="home/Mainindex" options={{ headerShown: false }} />
+      <Stack.Screen name="inbox/Inbox" options={{ headerShown: false }} />
+      <Stack.Screen name="projects/Projects" options={{ headerShown: false }} />
+      <Stack.Screen name="creator/Create" options={{ headerShown: false }} />
+      <Stack.Screen name="dashboard/Dashboard" options={{ headerShown: false }} />
+      <Stack.Screen name="tasks/Tasks" options={{ headerShown: false }} />
+      <Stack.Screen name="+not-found" />
+    </Stack>
+  );
+}
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
@@ -22,21 +57,7 @@ export default function RootLayout() {
     <UserProvider>
       <ProjectProvider>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack  screenOptions={{
-              headerTitle: "", // Hide title, show back arrow
-             headerShown:false// Hide back text on iOS
-            }}
-     >
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="Slider" options={{ headerShown: false }} />
-           <Stack.Screen name="Goals" options={{ headerShown: false }} />
-<Stack.Screen name="billing" options={{ headerShown: false }} />
-<Stack.Screen name="inbox" options={{ headerShown: false }} />
-<Stack.Screen name="projects" options={{ headerShown: false }} />
-<Stack.Screen name="home" options={{ headerShown: false }} />
-<Stack.Screen name="creator" options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" />
-          </Stack>
+          <AppNavigator />
           <StatusBar style="auto" />
         </ThemeProvider>
       </ProjectProvider>
