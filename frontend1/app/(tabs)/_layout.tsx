@@ -13,12 +13,8 @@ export default function TabLayout() {
 
   return (
     <Tabs
-      lazy={false}
       detachInactiveScreens={false}
-      sceneContainerStyle={{ flex: 1 }}
-      // Additional navigation speed optimizations
       backBehavior="initialRoute" // Always return to Home tab on back
-      tabBarHideOnKeyboard={true} // Hide tab bar when keyboard is open for smoother transitions
       screenListeners={{
         tabPress: e => {
           // Optionally, can add analytics or haptic feedback here for instant response
@@ -35,9 +31,6 @@ export default function TabLayout() {
           },
           default: {},
         }),
-        // Reduce animation duration for tab switching
-        animationEnabled: true,
-        tabBarAnimationDuration: 120,
       }}>
       <Tabs.Screen
         name="index"
