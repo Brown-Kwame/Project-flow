@@ -11,6 +11,7 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useUser } from '../context/UserContext'; // Import useUser
 
 export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
@@ -18,6 +19,9 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { login } = useUser(); // Get login from context
 
   useEffect(() => {
     const loadCredentials = async () => {
@@ -33,15 +37,26 @@ export default function LoginScreen() {
   }, []);
 
   const handleLogin = async () => {
-    if (rememberMe) {
-      await AsyncStorage.setItem('email', email);
-      await AsyncStorage.setItem('password', password);
-    } else {
-      await AsyncStorage.removeItem('email');
-      await AsyncStorage.removeItem('password');
+    setError('');
+    setLoading(true);
+    try {
+      if (!email || !password) {
+        setError('Email and password are required.');
+        setLoading(false);
+        return;
+      }
+      // Simulate authentication (replace with real API call)
+      await login({
+        name: email.split('@')[0],
+        email,
+        plan: 'Pro',
+        profileImage: null,
+      });
+      // No need to manually navigate; layout will switch to main app
+    } catch (e) {
+      setError('Login failed. Please try again.');
     }
-
-    router.push('/(auth)/Billing'); // simulate successful login
+    setLoading(false);
   };
 
   return (
@@ -121,8 +136,18 @@ export default function LoginScreen() {
       </View>
 
       {/* Login */}
-      <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
-        <Text style={styles.loginBtnText}>Log in</Text>
+      <TouchableOpacity style={styles.loginBtn} onPress={async () => {
+        await handleLogin();
+        if (!error && email && password) {
+          router.replace('/(tabs)'); // Use the correct route for the home page in tabs
+        }
+      }} disabled={loading}>
+        <Text style={styles.loginBtnText}>{loading ? 'Logging in...' : 'Log in'}</Text>
+      </TouchableOpacity>
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {/* Manual link to index page in tabs */}
+      <TouchableOpacity style={styles.loginLink} onPress={() => router.replace('/(tabs)')}>
+        <Text style={styles.loginTextBold}>Go to Home (Index Page)</Text>
       </TouchableOpacity>
 
       {/* Signup */}
@@ -333,5 +358,22 @@ const styles = StyleSheet.create({
     color: '#333',
     fontSize: 12,
     lineHeight: 18,
+  },
+  error: {
+    color: 'red',
+    fontSize: 14,
+    marginTop: 10,
+    textAlign: 'center',
+  },
+  loginLink: {
+    marginTop: 10,
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  loginTextBold: {
+    color: '#007bff',
+    fontWeight: 'bold',
+    fontSize: 16,
+    textDecorationLine: 'underline',
   },
 });

@@ -13,6 +13,13 @@ export default function TabLayout() {
 
   return (
     <Tabs
+      detachInactiveScreens={false}
+      backBehavior="initialRoute" // Always return to Home tab on back
+      screenListeners={{
+        tabPress: e => {
+          // Optionally, can add analytics or haptic feedback here for instant response
+        },
+      }}
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
@@ -20,32 +27,62 @@ export default function TabLayout() {
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
           ios: {
-            // Use a transparent background on iOS to show the blur effect
             position: 'absolute',
           },
           default: {},
         }),
       }}>
-      
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
           headerShown: false,
-          // Hide this tab from the tab bar
-          tabBarIcon: ({ color }: { color: string }) => <IconSymbol size={28} name="house.fill" color={color} />, // This will not show since tabBarButton is null
+          tabBarIcon: ({ color }) => <FontAwesome size={26} name="home" color={color} />,
+          tabBarLabelStyle: { fontWeight: '700', fontSize: 13, letterSpacing: 0.5, marginBottom: 2 },
+          tabBarItemStyle: { paddingVertical: 6, marginHorizontal: 2 },
+        }}
+      />
+ 
+      <Tabs.Screen
+        name="Tasks"
+        options={{
+          title: 'Tasks',
+          headerShown: false,
+          tabBarIcon: ({ color }) => <FontAwesome size={24} name="check-square" color={color} />,
+          tabBarLabelStyle: { fontWeight: '700', fontSize: 13, letterSpacing: 0.5, marginBottom: 2 },
+          tabBarItemStyle: { paddingVertical: 6, marginHorizontal: 2 },
         }}
       />
       <Tabs.Screen
+        name="Dashboard"
+        options={{
+          title: 'Dashboard',
+          headerShown: false,
+          tabBarIcon: ({ color }) => <FontAwesome size={24} name="line-chart" color={color} />,
+          tabBarLabelStyle: { fontWeight: '700', fontSize: 13, letterSpacing: 0.5, marginBottom: 2 },
+          tabBarItemStyle: { paddingVertical: 6, marginHorizontal: 2 },
+        }}
+      />
+      <Tabs.Screen
+        name="Create"
+        options={{
+          title: 'Create',
+          headerShown: false,
+          tabBarIcon: ({ color }) => <FontAwesome size={24} name="plus-circle" color={color} />,
+          tabBarLabelStyle: { fontWeight: '700', fontSize: 13, letterSpacing: 0.5, marginBottom: 2 },
+          tabBarItemStyle: { paddingVertical: 6, marginHorizontal: 2 },
+        }}
+      />
+           <Tabs.Screen
         name="explore"
         options={{
           title: 'Account',
           headerShown: false,
-         
-          tabBarIcon: ({ color }: { color: string }) => <FontAwesome size={28} name="user" color={color} />,
+          tabBarIcon: ({ color }) => <FontAwesome size={24} name="user" color={color} />,
+          tabBarLabelStyle: { fontWeight: '700', fontSize: 13, letterSpacing: 0.5, marginBottom: 2 },
+          tabBarItemStyle: { paddingVertical: 6, marginHorizontal: 2 },
         }}
       />
-     
     </Tabs>
   );
 }
