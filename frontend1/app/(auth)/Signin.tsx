@@ -12,7 +12,7 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useUser } from '../context/UserContext'; // Import useUser
-
+//import
 export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
@@ -146,10 +146,7 @@ export default function LoginScreen() {
       </TouchableOpacity>
       {error ? <Text style={styles.error}>{error}</Text> : null}
       {/* Manual link to index page in tabs */}
-      <TouchableOpacity style={styles.loginLink} onPress={() => router.replace('/(tabs)')}>
-        <Text style={styles.loginTextBold}>Go to Home (Index Page)</Text>
-      </TouchableOpacity>
-
+     
       {/* Signup */}
       <Text style={styles.signupText}>
         Don't have an account?{' '}
