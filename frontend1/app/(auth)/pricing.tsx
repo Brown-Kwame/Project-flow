@@ -55,9 +55,16 @@ export default function BillingScreen() {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleSubscribe}>
-        <Text style={styles.buttonText}>Subscribe Now</Text>
-      </TouchableOpacity>
+     <TouchableOpacity
+  style={styles.button}
+  onPress={async () => {
+    await handleSubscribe(); // waits for subscription to complete
+    router.replace('/(tabs)');
+  }}
+>
+  <Text style={styles.buttonText}>Subscribe Now</Text>
+</TouchableOpacity>
+
     </View>
   );
 }

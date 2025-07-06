@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, TextInput, Alert, Modal, } from 'react-native';
-import { ImageBackground } from 'react-native';
-
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, TextInput, Alert, Modal } from 'react-native';
 import { router } from 'expo-router';
-import { MaterialIcons, FontAwesome, Feather, Ionicons, AntDesign } from '@expo/vector-icons';
-
+import { MaterialIcons, FontAwesome, Feather, Ionicons } from '@expo/vector-icons';
+import idcLogo from '../../assets/images/idcLogo.png';
+import Forrester from '../../assets/images/ForresterLogo.png';
+import Gartner from '../../assets/images/GartnerLogo.png';
 const translations = {
   en: {
     brand: 'asana',
@@ -78,6 +78,11 @@ export default function AuthScreen() {
   const [showLangModal, setShowLangModal] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchText, setSearchText] = useState('');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+  };
 
   const handleNotification = () => {
     Alert.alert('Notifications', 'You have no notifications at the moment.');
@@ -92,10 +97,10 @@ export default function AuthScreen() {
   };
 
   return (
-    <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
+    <ScrollView style={[styles.scroll, isDarkMode ? styles.darkBackground : styles.lightBackground]} contentContainerStyle={styles.container}>
       <Modal visible={showLangModal} transparent animationType="fade">
         <TouchableOpacity style={styles.modalOverlay} onPress={() => setShowLangModal(false)} activeOpacity={1}>
-          <View style={styles.languageList}>
+          <View style={[styles.languageList, { backgroundColor: isDarkMode ? '#333' : '#fff' }]}>
             <TouchableOpacity
               style={styles.languageItem}
               onPress={() => {
@@ -103,7 +108,7 @@ export default function AuthScreen() {
                 setShowLangModal(false);
               }}
             >
-              <Text style={styles.languageText}>{translations.en.english}</Text>
+              <Text style={[styles.languageText, { color: isDarkMode ? '#fff' : '#000' }]}>{translations.en.english}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.languageItem}
@@ -112,7 +117,7 @@ export default function AuthScreen() {
                 setShowLangModal(false);
               }}
             >
-              <Text style={styles.languageText}>{translations.fr.french}</Text>
+              <Text style={[styles.languageText, { color: isDarkMode ? '#fff' : '#000' }]}>{translations.fr.french}</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -120,7 +125,14 @@ export default function AuthScreen() {
 
       <View style={styles.header}>
         <View style={styles.leftIcons}>
-          <TouchableOpacity onPress={handleNotification}>
+          <TouchableOpacity onPress={toggleDarkMode}>
+            <Ionicons 
+              name={isDarkMode ? 'moon' : 'sunny'} 
+              size={24} 
+              color="#FF6B6B" 
+            />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleNotification} style={{ marginLeft: 15 }}>
             <MaterialIcons name="notifications" size={24} color="#FF6B6B" />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setShowSearch(true)} style={{ marginLeft: 15 }}>
@@ -133,14 +145,14 @@ export default function AuthScreen() {
       </View>
 
       {showSearch && (
-        <View style={styles.searchBarContainer}>
+        <View style={[styles.searchBarContainer, { backgroundColor: isDarkMode ? '#444' : '#222' }]}>
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: isDarkMode ? '#fff' : '#000' }]}
             placeholder={t.searchPlaceholder}
             value={searchText}
             onChangeText={setSearchText}
             autoFocus
-            placeholderTextColor="#999"
+            placeholderTextColor={isDarkMode ? '#999' : '#ccc'}
           />
           <TouchableOpacity onPress={() => setShowSearch(false)}>
             <Feather name="x" size={22} color="#FF6B6B" />
@@ -148,9 +160,7 @@ export default function AuthScreen() {
         </View>
       )}
 
-
-
-      <Text style={styles.tagline}>{t.tagline}</Text>
+      <Text style={[styles.tagline, { color: isDarkMode ? '#fff' : '#000' }]}>{t.tagline}</Text>
 
       <TouchableOpacity style={styles.ctaButton} onPress={handleSeeHow}>
         <Text style={styles.ctaButtonText}>{t.seeHow}</Text>
@@ -167,9 +177,9 @@ export default function AuthScreen() {
         />
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t.aiTitle}</Text>
-        <Text style={styles.sectionText}>{t.aiText}</Text>
+      <View style={[styles.section, { backgroundColor: isDarkMode ? '#333' : '#f9f9f9' }]}>
+        <Text style={[styles.sectionTitle, { color: isDarkMode ? '#fff' : '#222' }]}>{t.aiTitle}</Text>
+        <Text style={[styles.sectionText, { color: isDarkMode ? '#fff' : '#444' }]}>{t.aiText}</Text>
         <TouchableOpacity style={styles.readMoreButton} onPress={() => Alert.alert(t.readMore, t.aiText)}>
           <Text style={styles.readMoreText}>{t.readMore}</Text>
         </TouchableOpacity>
@@ -179,44 +189,44 @@ export default function AuthScreen() {
         />
       </View>
 
-      <View style={styles.collabBox}>
-        <Text style={styles.collabTitle}>{t.collaborators}</Text>
+      <View style={[styles.collabBox, { backgroundColor: isDarkMode ? '#444' : '#f2f2f2' }]}>
+        <Text style={[styles.collabTitle, { color: isDarkMode ? '#fff' : '#FF6B6B' }]}>{t.collaborators}</Text>
         <View style={styles.collabContainer}>
           <View style={styles.sponsorItem}>
             <Image 
-              source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Gartner_Logo.svg/1200px-Gartner_Logo.svg.png' }}
+              source={Gartner}
               style={styles.sponsorLogo}
             />
-            <Text style={styles.collabText}>{t.gartner}</Text>
+           
           </View>
           <View style={styles.sponsorItem}>
             <Image 
-              source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IDC_logo.svg/1200px-IDC_logo.svg.png' }}
-              style={styles.sponsorLogo}
-            />
-            <Text style={styles.collabText}>{t.idc}</Text>
+      source={idcLogo}
+      style={styles.sponsorLogo}
+    />
+           
           </View>
           <View style={styles.sponsorItem}>
             <Image 
-              source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Forrester_logo.svg/1200px-Forrester_logo.svg.png' }}
+              source={Forrester}
               style={styles.sponsorLogo}
             />
-            <Text style={styles.collabText}>{t.forrester}</Text>
+            
           </View>
         </View>
       </View>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { backgroundColor: isDarkMode ? '#333' : '#f2f2f2' }]}>
         <View style={styles.footerCol}>
-          <Text style={styles.footerTitle}>{t.contactUs}</Text>
+          <Text style={[styles.footerTitle, { color: isDarkMode ? '#fff' : '#FF6B6B' }]}>{t.contactUs}</Text>
           <Text style={styles.footerLabel}>{t.sendMsg}</Text>
           <TextInput 
-            style={styles.footerInput} 
+            style={[styles.footerInput, { backgroundColor: isDarkMode ? '#444' : '#fff', color: isDarkMode ? '#fff' : '#000' }]} 
             placeholder={t.yourName} 
             placeholderTextColor="#999"
           />
           <TextInput 
-            style={styles.footerInput} 
+            style={[styles.footerInput, { backgroundColor: isDarkMode ? '#444' : '#fff', color: isDarkMode ? '#fff' : '#000' }]} 
             placeholder={t.yourEmail} 
             placeholderTextColor="#999"
           />
@@ -228,23 +238,24 @@ export default function AuthScreen() {
           </TouchableOpacity>
         </View>
         <View style={styles.footerCol}>
-          <Text style={styles.footerTitle}>{t.sitemap}</Text>
-          <Text style={styles.footerLink}>{t.workMgmt}</Text>
-          <Text style={styles.footerLink}>{t.basics}</Text>
-          <Text style={styles.footerLink}>{t.pricing}</Text>
-          <Text style={styles.footerLink}>{t.desktop}</Text>
+          <Text style={[styles.footerTitle, { color: isDarkMode ? '#fff' : '#FF6B6B' }]}>{t.sitemap}</Text>
+          <Text style={[styles.footerLink, { color: isDarkMode ? '#fff' : '#444' }]}>{t.workMgmt}</Text>
+          <Text style={[styles.footerLink, { color: isDarkMode ? '#fff' : '#444' }]}>{t.basics}</Text>
+          <Text style={[styles.footerLink, { color: isDarkMode ? '#fff' : '#444' }]}>{t.pricing}</Text>
+          <Text style={[styles.footerLink, { color: isDarkMode ? '#fff' : '#444' }]}>{t.desktop}</Text>
           <TouchableOpacity onPress={handlePremiumPress}>
             <Text style={[styles.footerLink, styles.premiumLink]}>{t.premium}</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.footerCol}>
-          <Text style={styles.footerTitle}>{t.using}</Text>
-          <Text style={styles.footerLink}>{t.terms}</Text>
-          <Text style={styles.footerLink}>{t.help}</Text>
-          <Text style={styles.footerLink}>{t.community}</Text>
-          <Text style={styles.footerLink}>{t.blog}</Text>
+          <Text style={[styles.footerTitle, { color: isDarkMode ? '#fff' : '#FF6B6B' }]}>{t.using}</Text>
+          <Text style={[styles.footerLink, { color: isDarkMode ? '#fff' : '#444' }]}>{t.terms}</Text>
+          <Text style={[styles.footerLink, { color: isDarkMode ? '#fff' : '#444' }]}>{t.help}</Text>
+          <Text style={[styles.footerLink, { color: isDarkMode ? '#fff' : '#444' }]}>{t.community}</Text>
+          <Text style={[styles.footerLink, { color: isDarkMode ? '#fff' : '#444' }]}>{t.blog}</Text>
         </View>
       </View>
+
       <View style={styles.socialRow}>
         <TouchableOpacity onPress={() => setShowLangModal(true)}>
           <MaterialIcons name="language" size={24} color="#FF6B6B" />
@@ -261,21 +272,27 @@ export default function AuthScreen() {
         <TouchableOpacity>
           <Feather name="instagram" size={24} color="#FF6B6B" />
         </TouchableOpacity>
-        <Text style={styles.languageLabel}>{lang === 'en' ? t.english : t.french}</Text>
+        <Text style={[styles.languageLabel, { color: isDarkMode ? '#fff' : '#FF6B6B' }]}>{lang === 'en' ? t.english : t.french}</Text>
       </View>
-      <Text style={styles.copyright}>{t.copyright}</Text>
+      <Text style={[styles.copyright, { color: isDarkMode ? '#aaa' : '#555' }]}>{t.copyright}</Text>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: { backgroundColor: '#fff' },
-container: {
-  alignItems: 'center',
-  paddingBottom: 40,
-  backgroundColor: '#fff',
-},
-
+  scroll: {
+    flex: 1,
+  },
+  container: {
+    alignItems: 'center',
+    paddingBottom: 40,
+  },
+  darkBackground: {
+    backgroundColor: '#121212',
+  },
+  lightBackground: {
+    backgroundColor: '#fff',
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -289,10 +306,16 @@ container: {
     flexDirection: 'row',
     alignItems: 'center',
   },
+  logoBrand: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    marginTop: 10,
+    gap: 8,
+  },
   searchBarContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#222',
     borderRadius: 8,
     marginBottom: 10,
     marginTop: 5,
@@ -303,32 +326,10 @@ container: {
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: '#fff',
     paddingVertical: 8,
-    backgroundColor: '#222',
   },
-  logoBrand: {
-  flexDirection: 'row',       // Align logo and text horizontally
-  alignItems: 'center',      // Center vertically
-  marginBottom: 20,
-  marginTop: 10,
-  gap: 8,                    // Adds space between logo and text
-},
-logo: {
-  width: 50,
-  height: 50,
-  // marginBottom: -15,       // Remove this if it was forcing overlap
-},
-brand: {
-  fontSize: 28,
-  fontWeight: 'bold',
-  color: '#FF6B6B',
-  letterSpacing: 1,
-  marginLeft: 8,             // Explicit spacing (alternative to `gap`)
-},
   tagline: {
     fontSize: 13,
-    color: '#333',
     textAlign: 'center',
     marginBottom: 10,
     marginHorizontal: 20,
@@ -356,10 +357,8 @@ brand: {
     width: 110,
     height: 70,
     borderRadius: 8,
-    marginHorizontal: 4,
   },
   section: {
-    backgroundColor: '#f9f9f9',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -371,12 +370,10 @@ brand: {
     fontWeight: 'bold',
     fontSize: 16,
     marginBottom: 8,
-    color: '#fff',
     textAlign: 'center',
   },
   sectionText: {
     fontSize: 13,
-    color: '#444',
     marginBottom: 8,
     textAlign: 'center',
   },
@@ -401,7 +398,6 @@ brand: {
     alignSelf: 'center',
   },
   collabBox: {
-    backgroundColor: '#f2f2f2',
     borderRadius: 12,
     padding: 20,
     marginHorizontal: 16,
@@ -412,8 +408,7 @@ brand: {
   },
   collabTitle: {
     fontWeight: 'bold',
-    fontSize: 22,
-    color: '#FF6B6B',
+    fontSize: 30,
     marginBottom: 20,
     textAlign: 'center',
   },
@@ -427,65 +422,81 @@ brand: {
     alignItems: 'center',
     minWidth: 100,
   },
+
   sponsorLogo: {
     width: 100,
     height: 50,
     resizeMode: 'contain',
-    marginBottom: 10,
+    marginBottom: 8,
+   
   },
+
   collabText: {
     fontWeight: 'bold',
     fontSize: 16,
-    color: '#222',
+    color: '#222', // Default color for light theme
     textAlign: 'center',
   },
+
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: '#f2f2f2',
     borderRadius: 12,
     padding: 16,
     marginTop: 12,
     width: '96%',
     alignSelf: 'center',
     gap: 10,
+    backgroundColor: '#f2f2f2', // Light theme background
   },
+
   footerCol: {
     flex: 1,
     marginHorizontal: 6,
   },
+
   footerTitle: {
-    color: '#FF6B6B',
+    color: '#FF6B6B', // Title color remains the same
     fontWeight: 'bold',
     fontSize: 15,
     marginBottom: 6,
   },
- footerLabel: {
-  color: '#333', // was '#ddd'
-},
- footerInput: {
-  backgroundColor: '#f2f2f2', // was '#333'
-  color: '#000',              // was '#fff'
-},
+
+  footerLabel: {
+    color: '#333', // Default color for light theme
+  },
+
+  footerInput: {
+    backgroundColor: '#f2f2f2', // Light theme background
+    color: '#000', // Text color for light theme
+    borderRadius: 5,
+    padding: 8,
+    marginVertical: 4,
+  },
+
   footerButton: {
-    backgroundColor: '#FF6B6B',
+    backgroundColor: '#FF6B6B', // Button color remains the same
     borderRadius: 6,
     paddingVertical: 8,
     alignItems: 'center',
     marginTop: 4,
   },
+
   footerButtonText: {
-    color: '#fff',
+    color: '#fff', // Button text color remains the same
     fontWeight: 'bold',
-    fontSize: 14,
+    fontSize: 10,
   },
+
   footerLink: {
-  color: '#444', // was '#ddd'
-},
+    color: '#444', // Default color for light theme
+  },
+
   premiumLink: {
-    color: '#FF6B6B',
+    color: '#FF6B6B', // Premium link color remains the same
     fontWeight: 'bold',
   },
+
   socialRow: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -493,34 +504,59 @@ brand: {
     marginTop: 14,
     gap: 16,
   },
+
   languageLabel: {
     fontSize: 14,
-    color: '#FF6B6B',
+    color: '#FF6B6B', // Language label color remains the same
     marginLeft: 8,
   },
- copyright: {
-  color: '#555', // was '#999'
-},
+
+  copyright: {
+    color: '#555', // Default color for light theme
+  },
+
+  // Dark theme styles
+  darkFooter: {
+    backgroundColor: '#2a2a2a', // Dark theme background
+  },
+
+  darkFooterLabel: {
+    color: '#ddd', // Text color for dark theme
+  },
+
+  darkFooterInput: {
+    backgroundColor: '#444', // Dark theme background
+    color: '#fff', // Text color for dark theme
+  },
+
+  darkCollabText: {
+    color: '#fff', // Text color for dark theme
+  },
+
+  darkCopyright: {
+    color: '#aaa', // Lighter color for dark theme
+  },
 
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
     justifyContent: 'center',
     alignItems: 'center',
   },
+
   languageList: {
-    backgroundColor: '#fff',
     borderRadius: 8,
     padding: 10,
     minWidth: 180,
     elevation: 5,
   },
+
   languageItem: {
     paddingVertical: 10,
     paddingHorizontal: 12,
   },
+
   languageText: {
     fontSize: 16,
-    color: '#111',
+    color: '#111', // Default color for light theme
   },
 });

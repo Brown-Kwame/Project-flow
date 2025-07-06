@@ -29,8 +29,27 @@ const handleSignup = async () => {
     return;
   }
 
+  // ✅ Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    setError('Please enter a valid email address.');
+    setLoading(false);
+    return;
+  }
+
+  // ✅ Match passwords
   if (password !== confirmPassword) {
     setError('Passwords do not match.');
+    setLoading(false);
+    return;
+  }
+
+  // ✅ Validate password strength
+  const strongPasswordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&#^()[\]{}])[A-Za-z\d@$!%*?&#^()[\]{}]{8,}$/;
+  if (!strongPasswordRegex.test(password)) {
+    setError(
+      'Password must be at least 8 characters long and include letters, numbers, and special characters.'
+    );
     setLoading(false);
     return;
   }
@@ -43,7 +62,6 @@ const handleSignup = async () => {
       profileImage: null,
     });
 
-    // ✅ Navigate to Billing page after successful signup
     router.replace('/(auth)/Billing');
   } catch (e) {
     setError('Signup failed. Please try again.');
@@ -51,6 +69,7 @@ const handleSignup = async () => {
 
   setLoading(false);
 };
+
 
   const handleLoginLink = () => {
     router.push('/(auth)/Signin');
