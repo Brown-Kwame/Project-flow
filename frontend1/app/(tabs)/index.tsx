@@ -12,6 +12,10 @@ import {
   Easing,
 } from 'react-native';
 import HomeCard from '../components/HomeCard';
+import { useProjectContext } from '../context/ProjectContext';
+import { useUser } from '../context/UserContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import BloomCard from '../components/BloomCard';
 
 const CARD_COLORS = [
   { bg: '#f7faff', iconBg: '#668cff22', icon: '#668cff' },
@@ -23,60 +27,100 @@ const CARD_COLORS = [
   { bg: '#f0fff7', iconBg: '#00bfae22', icon: '#00bfae' },
 ];
 
-const cardData = [
-  {
-    title: 'Projects',
-    subtitle: 'Manage all your projects',
-    icon: 'group',
-    color: CARD_COLORS[0],
-    link: '/projects/Projects',
-  },
-  {
-    title: 'Tasks',
-    subtitle: 'View and update your tasks',
-    icon: 'check-square',
-    color: CARD_COLORS[1],
-    link: '/tasks/Tasks',
-  },
-  {
-    title: 'Dashboard',
-    subtitle: 'Analytics & progress',
-    icon: 'line-chart',
-    color: CARD_COLORS[2],
-    link: '/dashboard/Dashboard',
-  },
-  {
-    title: 'Goals',
-    subtitle: 'Set and track goals',
-    icon: 'flag',
-    color: CARD_COLORS[3],
-    link: '/Goals/Goals',
-  },
-  {
-    title: 'Billing',
-    subtitle: 'Manage your plan',
-    icon: 'money',
-    color: CARD_COLORS[4],
-    link: '/(auth)/Billing',
-  },
-  {
-    title: 'Inbox',
-    subtitle: 'Team chat & comments',
-    icon: 'inbox',
-    color: CARD_COLORS[5],
-    link: '/inbox/Inbox',
-  },
-  {
-    title: 'Create',
-    subtitle: 'Add new project or task',
-    icon: 'plus',
-    color: CARD_COLORS[6],
-    link: '/creator/Create',
-  },
-];
-
 const Index = () => {
   const router = useRouter();
+  const { projects, streaks } = useProjectContext ? useProjectContext() : { projects: [], streaks: 0 };
+  const { profile } = useUser ? useUser() : { profile: {} };
+  type Task = { status?: string; [key: string]: any };
+  const [tasks, setTasks] = useState<Task[]>([]);
+  type Goal = { status?: string; [key: string]: any };
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [tasksRaw, goalsRaw] = await Promise.all([
+          AsyncStorage.getItem('asana_tasks'),
+          AsyncStorage.getItem('asana_goals'),
+        ]);
+        if (mounted) {
+          setTasks(tasksRaw ? JSON.parse(tasksRaw) : []);
+          setGoals(goalsRaw ? JSON.parse(goalsRaw) : []);
+        }
+      } catch {
+        if (mounted) {
+          setTasks([]);
+          setGoals([]);
+        }
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+    fetchData();
+    return () => { mounted = false; };
+  }, []);
+
+  // Memoized summaries for performance
+  const projectSummary = React.useMemo(() => {
+    if (!projects) return 'No projects found.';
+    return `${projects.length} projects, ${streaks} day streak`;
+  }, [projects, streaks]);
+
+  const taskSummary = React.useMemo(() => {
+    if (!Array.isArray(tasks) || tasks.length === 0) return null;
+    const done = tasks.filter((t) => t && t.status === 'Done').length;
+    const overdue = tasks.filter((t) => t && t.status === 'Overdue').length;
+    const due = tasks.filter((t) => t && t.status !== 'Done').length;
+    return { total: tasks.length, done, overdue, due };
+  }, [tasks]);
+
+  const goalSummary = React.useMemo(() => {
+    if (!Array.isArray(goals) || goals.length === 0) return null;
+    const done = goals.filter((g) => g && g.status === 'Done').length;
+    const due = goals.filter((g) => g && g.status !== 'Done').length;
+    return { total: goals.length, done, due };
+  }, [goals]);
+
+  const dashboardSummary = React.useMemo(() => {
+    return `Analytics for ${projects.length} projects. See trends, status, and more.`;
+  }, [projects]);
+
+  // Card data for each summary
+  const bloomCards = [
+    {
+      title: 'Projects',
+      subtitle: 'All your projects at a glance',
+      iconName: 'group',
+      onPress: () => router.push('/projects/Projects'),
+    },
+    {
+      title: 'Tasks',
+      subtitle: 'Your actionable items',
+      iconName: 'check-square',
+      onPress: () => router.push('/tasks/Tasks'),
+    },
+    {
+      title: 'Dashboard',
+      subtitle: 'Analytics & progress',
+      iconName: 'line-chart',
+      onPress: () => router.push('/dashboard/Dashboard'),
+    },
+    {
+      title: 'Goals',
+      subtitle: 'Set and track goals',
+      iconName: 'flag',
+      onPress: () => router.push('/Goals/Goals'),
+    },
+    {
+      title: 'Create',
+      subtitle: 'Quickly add a new project or task',
+      iconName: 'plus',
+      onPress: () => router.push('/creator/Create'),
+    },
+  ];
 
   // Animation states
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -98,12 +142,6 @@ const Index = () => {
     ]).start();
   }, []);
 
-  const numColumns = Dimensions.get('window').width > 600 ? 3 : 2;
-  const rows = [];
-  for (let i = 0; i < cardData.length; i += numColumns) {
-    rows.push(cardData.slice(i, i + numColumns));
-  }
-
   return (
     <View style={styles.container1}>
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
@@ -124,21 +162,10 @@ const Index = () => {
             <Text style={styles.heading}>Pro Team</Text>
           </View>
 
-          <View style={styles.grid}>
-            {rows.map((row, i) => (
-              <View style={styles.row} key={i}>
-                {row.map((card) => (
-                  <Link href={card.link as any} asChild key={card.title}>
-                    <HomeCard
-                      title={card.title}
-                      subtitle={card.subtitle}
-                      icon={card.icon}
-                      color={card.color}
-                      onPress={() => router.push(card.link as any)}
-                    />
-                  </Link>
-                ))}
-              </View>
+          {/* Professional summary cards */}
+          <View style={{ width: '100%', alignItems: 'center', marginBottom: 24 }}>
+            {bloomCards.map((card) => (
+              <BloomCard key={card.title} {...card} />
             ))}
           </View>
         </Animated.View>
