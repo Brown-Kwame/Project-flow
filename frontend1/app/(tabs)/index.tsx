@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     marginRight: 20,
   },
   heading: {
-    fontSize: 32,
+    fontSize: 22, // reduced from 32
     fontWeight: 'bold',
     color: '#222',
     marginLeft: 16,
