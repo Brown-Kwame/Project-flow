@@ -56,7 +56,7 @@ export default function TabLayout() {
             <Tabs.Screen
         name="Inbox"
         options={{
-          title: 'Inbox',
+          title: 'Chat Room',
           headerShown: false,
           tabBarIcon: ({ color }) => <FontAwesome size={24} name='bell' color={color} />,
           tabBarLabelStyle: { fontWeight: '700', fontSize: 13, letterSpacing: 0.5, marginBottom: 2 },
