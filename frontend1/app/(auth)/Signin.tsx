@@ -61,35 +61,14 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Back Button */}
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => router.push('/(auth)/CreateAccount')}
-      >
-        <Ionicons name="chevron-back" size={24} color="#c0392b" />
-      </TouchableOpacity>
-
+      
       <Text style={styles.welcome}>Welcome to Asana</Text>
       <Text style={styles.subtitle}>To get started, please sign in</Text>
 
       <Text style={styles.sectionTitle}>Log in to your account</Text>
       <Text style={styles.sectionSubtitle}>Welcome back! Select method to log in:</Text>
 
-      {/* Social Buttons */}
-      <View style={styles.socialRow}>
-        <TouchableOpacity style={styles.socialBtn}>
-          <Text style={styles.socialText}>Google</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialBtn}>
-          <Image
-            source={{
-              uri: 'https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png',
-            }}
-            style={styles.socialIcon}
-          />
-          <Text style={styles.socialText}>Facebook</Text>
-        </TouchableOpacity>
-      </View>
+      
 
       <View style={styles.dividerRow}>
         <View style={styles.divider} />
