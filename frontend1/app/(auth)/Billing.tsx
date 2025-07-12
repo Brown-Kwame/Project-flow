@@ -31,7 +31,7 @@ export default function PricingScreen() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<PlanKey>('standard');
 
-  const handleSubscribe = () => router.push('/(auth)/Login');
+  const handleSubscribe = () => router.push('/(auth)/pricing');
 
   const plans: Record<PlanKey, PlanDetails> = {
     standard: {
