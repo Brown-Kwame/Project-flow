@@ -1,2 +1,2 @@
-// This file has been removed as Create is no longer a tab.
+// This file has been removed as per user request.
 export default null;

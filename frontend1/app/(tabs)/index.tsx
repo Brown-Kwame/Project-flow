@@ -114,12 +114,6 @@ const Index = () => {
       iconName: 'flag',
       onPress: () => router.push('/Goals/Goals'),
     },
-    {
-      title: 'Create',
-      subtitle: 'Quickly add a new project or task',
-      iconName: 'plus',
-      onPress: () => router.push('/creator/Create'),
-    },
   ];
 
   // Animation states
@@ -142,6 +136,45 @@ const Index = () => {
     ]).start();
   }, []);
 
+  const headings = ["Start Something Great", "Let's get that project done."];
+  const [displayedHeading, setDisplayedHeading] = useState('');
+  const [headingIndex, setHeadingIndex] = useState(0);
+  const [charIndex, setCharIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    const current = headings[headingIndex];
+    // Faster typing and deleting, longer pause at end
+    const typingSpeed = 30;
+    const deletingSpeed = 15;
+    const pauseEnd = 600;
+    const pauseSwitch = 200;
+    if (!isDeleting && charIndex < current.length) {
+      timeout = setTimeout(() => {
+        setDisplayedHeading(current.slice(0, charIndex + 1));
+        setCharIndex(charIndex + 1);
+      }, typingSpeed);
+    } else if (!isDeleting && charIndex === current.length) {
+      timeout = setTimeout(() => {
+        setIsDeleting(true);
+      }, pauseEnd);
+    } else if (isDeleting && charIndex > 0) {
+      timeout = setTimeout(() => {
+        setDisplayedHeading(current.slice(0, charIndex - 1));
+        setCharIndex(charIndex - 1);
+      }, deletingSpeed);
+    } else if (isDeleting && charIndex === 0) {
+      timeout = setTimeout(() => {
+        setIsDeleting(false);
+        setHeadingIndex((headingIndex + 1) % headings.length);
+      }, pauseSwitch);
+    }
+    return () => {
+      if (timeout !== undefined) clearTimeout(timeout);
+    };
+  }, [charIndex, isDeleting, headingIndex]);
+
   return (
     <View style={styles.container1}>
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
@@ -159,7 +192,7 @@ const Index = () => {
               source={require('../../assets/images/Icon.png')}
               style={{ width: 32, height: 32, marginRight: 12 }}
             />
-            <Text style={styles.heading}>Pro Team</Text>
+            <Text style={styles.heading}>{displayedHeading}<Text style={{color:'#668cff'}}>|</Text></Text>
           </View>
 
           {/* Professional summary cards */}
