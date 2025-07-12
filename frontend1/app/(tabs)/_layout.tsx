@@ -54,11 +54,11 @@ export default function TabLayout() {
       />
 
             <Tabs.Screen
-        name="inbox"
+        name="Inbox"
         options={{
           title: 'Inbox',
           headerShown: false,
-          tabBarIcon: ({ color }) => <FontAwesome size={24} name='user' color={color} />,
+          tabBarIcon: ({ color }) => <FontAwesome size={24} name='bell' color={color} />,
           tabBarLabelStyle: { fontWeight: '700', fontSize: 13, letterSpacing: 0.5, marginBottom: 2 },
           tabBarItemStyle: { paddingVertical: 6, marginHorizontal: 2 },
         }}
