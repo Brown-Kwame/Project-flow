@@ -1,1 +1,2 @@
-export { default } from '../creator/Create';
+// This file has been removed as Create is no longer a tab.
+export default null;
