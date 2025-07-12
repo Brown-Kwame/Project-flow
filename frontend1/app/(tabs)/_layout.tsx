@@ -42,7 +42,6 @@ export default function TabLayout() {
           tabBarItemStyle: { paddingVertical: 6, marginHorizontal: 2 },
         }}
       />
- 
       <Tabs.Screen
         name="Tasks"
         options={{
@@ -54,26 +53,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="Dashboard"
-        options={{
-          title: 'Dashboard',
-          headerShown: false,
-          tabBarIcon: ({ color }) => <FontAwesome size={24} name="line-chart" color={color} />,
-          tabBarLabelStyle: { fontWeight: '700', fontSize: 13, letterSpacing: 0.5, marginBottom: 2 },
-          tabBarItemStyle: { paddingVertical: 6, marginHorizontal: 2 },
-        }}
-      />
-      <Tabs.Screen
-        name="Create"
-        options={{
-          title: 'Create',
-          headerShown: false,
-          tabBarIcon: ({ color }) => <FontAwesome size={24} name="plus-circle" color={color} />,
-          tabBarLabelStyle: { fontWeight: '700', fontSize: 13, letterSpacing: 0.5, marginBottom: 2 },
-          tabBarItemStyle: { paddingVertical: 6, marginHorizontal: 2 },
-        }}
-      />
-           <Tabs.Screen
         name="explore"
         options={{
           title: 'Account',

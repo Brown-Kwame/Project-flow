@@ -18,7 +18,6 @@ function AppNavigator() {
        <Stack.Screen name="(auth)/Signin" options={{ headerShown: false }} />
          <Stack.Screen name="(auth)/signup" options={{ headerShown: false }} />
          <Stack.Screen name="(auth)/forgotpassword" options={{ headerShown: false }} />
-         <Stack.Screen name="(auth)/CreateAccount" options={{ headerShown: false }} />
          <Stack.Screen name="(auth)/changepass" options={{ headerShown: false }} />
          <Stack.Screen name="(auth)/contact" options={{ headerShown: false }} />
          <Stack.Screen name="(auth)/pricing" options={{ headerShown: false }} />
@@ -35,7 +34,6 @@ function AppNavigator() {
       <Stack.Screen name="home/Mainindex" options={{ headerShown: false }} />
       <Stack.Screen name="inbox/Inbox" options={{ headerShown: false }} />
       <Stack.Screen name="projects/Projects" options={{ headerShown: false }} />
-      <Stack.Screen name="creator/Create" options={{ headerShown: false }} />
       <Stack.Screen name="dashboard/Dashboard" options={{ headerShown: false }} />
       <Stack.Screen name="tasks/Tasks" options={{ headerShown: false }} />
       <Stack.Screen name="+not-found" />
