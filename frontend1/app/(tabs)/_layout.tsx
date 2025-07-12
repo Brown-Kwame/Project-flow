@@ -62,6 +62,16 @@ export default function TabLayout() {
           tabBarItemStyle: { paddingVertical: 6, marginHorizontal: 2 },
         }}
       />
+      <Tabs.Screen
+        name="inbox"
+        options={{
+          title: 'Inbox',
+          headerShown: false,
+          tabBarIcon: ({ color }) => <FontAwesome size={24} name='user' color={color} />,
+          tabBarLabelStyle: { fontWeight: '700', fontSize: 13, letterSpacing: 0.5, marginBottom: 2 },
+          tabBarItemStyle: { paddingVertical: 6, marginHorizontal: 2 },
+        }}
+      />
     </Tabs>
   );
 }

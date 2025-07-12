@@ -136,45 +136,6 @@ const Index = () => {
     ]).start();
   }, []);
 
-  const headings = ["Start Something Great", "Let's get that project done."];
-  const [displayedHeading, setDisplayedHeading] = useState('');
-  const [headingIndex, setHeadingIndex] = useState(0);
-  const [charIndex, setCharIndex] = useState(0);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  useEffect(() => {
-    let timeout: ReturnType<typeof setTimeout> | undefined;
-    const current = headings[headingIndex];
-    // Faster typing and deleting, longer pause at end
-    const typingSpeed = 30;
-    const deletingSpeed = 15;
-    const pauseEnd = 600;
-    const pauseSwitch = 200;
-    if (!isDeleting && charIndex < current.length) {
-      timeout = setTimeout(() => {
-        setDisplayedHeading(current.slice(0, charIndex + 1));
-        setCharIndex(charIndex + 1);
-      }, typingSpeed);
-    } else if (!isDeleting && charIndex === current.length) {
-      timeout = setTimeout(() => {
-        setIsDeleting(true);
-      }, pauseEnd);
-    } else if (isDeleting && charIndex > 0) {
-      timeout = setTimeout(() => {
-        setDisplayedHeading(current.slice(0, charIndex - 1));
-        setCharIndex(charIndex - 1);
-      }, deletingSpeed);
-    } else if (isDeleting && charIndex === 0) {
-      timeout = setTimeout(() => {
-        setIsDeleting(false);
-        setHeadingIndex((headingIndex + 1) % headings.length);
-      }, pauseSwitch);
-    }
-    return () => {
-      if (timeout !== undefined) clearTimeout(timeout);
-    };
-  }, [charIndex, isDeleting, headingIndex]);
-
   return (
     <View style={styles.container1}>
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
@@ -192,7 +153,12 @@ const Index = () => {
               source={require('../../assets/images/Icon.png')}
               style={{ width: 32, height: 32, marginRight: 12 }}
             />
-            <Text style={styles.heading}>{displayedHeading}<Text style={{color:'#668cff'}}>|</Text></Text>
+            <Text style={styles.brandTitle}>Project Flow</Text>
+          </View>
+          <View style={styles.introBox}>
+            <Text style={styles.introText}>
+              Get a quick overview of your projects, tasks, and goals. Use the cards below to dive into details, track progress, and stay organized every day.
+            </Text>
           </View>
 
           {/* Professional summary cards */}
@@ -221,11 +187,32 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     marginRight: 20,
   },
-  heading: {
-    fontSize: 22, // reduced from 32
+  brandTitle: {
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#222',
-    marginLeft: 16,
+    letterSpacing: 0.5,
+  },
+  introBox: {
+    backgroundColor: '#f7faff',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 18,
+    marginTop: -10,
+    marginLeft: 0,
+    marginRight: 0,
+    shadowColor: '#668cff', // blue glow
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 8,
+    borderWidth: 2,
+    borderColor: '#b3e5fc', // light blue border
+  },
+  introText: {
+    fontSize: 15,
+    color: '#555',
+    textAlign: 'left',
   },
   grid: {
     flexDirection: 'column',
