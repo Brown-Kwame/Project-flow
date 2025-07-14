@@ -11,7 +11,7 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
-  ImageBackground
+  ImageBackground,
 } from 'react-native';
 import { NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { router } from 'expo-router';
@@ -231,11 +231,11 @@ safeArea: {
   form: {
     width: '90%',
     backgroundColor: 'rgba(255,255,255,0.92)',
-    padding: 24,
+    padding: '15%',
     borderRadius: 16,
     shadowColor: '#aaa',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 10,
     shadowRadius: 6,
     elevation: 4,
   },
@@ -251,6 +251,7 @@ safeArea: {
     padding: 12,
     marginTop: 4,
     backgroundColor:  'rgba(255,255,255,0.85)',
+    color: '#000',
   },
   signupBtn: {
     backgroundColor: '#007bff',

@@ -62,7 +62,7 @@ export default function LoginScreen() {
   return (
     <SafeAreaView style={styles.container}>
       
-      <Text style={styles.welcome}>Welcome to Asana</Text>
+      <Text style={styles.welcome}>Welcome to Project Flow</Text>
       <Text style={styles.subtitle}>To get started, please sign in</Text>
 
       <Text style={styles.sectionTitle}>Log in to your account</Text>
@@ -178,32 +178,33 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   welcome: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: 'bold',
     marginTop: 10,
     color: '#000',
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#444',
     marginBottom: 10,
     textAlign: 'center',
-    textDecorationLine: 'underline',
+   fontStyle: 'italic',
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 27,
     fontWeight: 'bold',
     marginTop: 10,
     color: '#000',
     textAlign: 'center',
-    textDecorationLine: 'underline',
+    
   },
   sectionSubtitle: {
-    fontSize: 13,
+    fontSize: 15,
     color: '#666',
     marginBottom: 14,
     textAlign: 'center',
+    fontStyle: 'italic',
   },
   socialRow: {
     flexDirection: 'row',
