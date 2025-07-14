@@ -49,6 +49,21 @@ spring:
             - Path=/goals/**
           filters:
             - RewritePath=/goals/(?<segment>.*), /goals/${segment}
+          
+        - id: auth-service # Unique ID for this route
+          uri: lb://AUTH-SERVICE # This MUST match the Auth Service's spring.application.name
+          predicates:
+            - Path=/auth/** # All requests starting with /auth will go to Auth Service
+          filters:
+            - RewritePath=/auth/(?<segment>.*), /auth/${segment}
+
+            # NEW ROUTE FOR PORTFOLIO SERVICE
+        - id: portfolio-service # Unique ID for this route
+          uri: lb://PORTFOLIO-SERVICE # This MUST match the Portfolio Service's spring.application.name
+          predicates:
+            - Path=/portfolios/** # All requests starting with /portfolios will go to Portfolio Service
+          filters:
+            - RewritePath=/portfolios/(?<segment>.*), /portfolios/${segment}
 
 eureka:
   client:
