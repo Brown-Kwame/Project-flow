@@ -30,7 +30,7 @@ const Goals = () => {
     return goals.filter(g =>
       g.title.toLowerCase().includes(search.toLowerCase()) ||
       g.status.toLowerCase().includes(search.toLowerCase()) ||
-      (g.owner && g.owner.toLowerCase().includes(search.toLowerCase()))
+      (g.owner?.toLowerCase().includes(search.toLowerCase()))
     );
   }, [goals, search]);
 
@@ -77,6 +77,7 @@ const Goals = () => {
           setGoals(demoGoals);
         }
       } catch (e) {
+        console.error('Failed to load goals:', e);
         setGoals(demoGoals);
       } finally {
         setLoading(false);

@@ -1,619 +1,387 @@
+
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useState, useContext, createContext } from 'react';
+import { useColorScheme as useSystemColorScheme, ScrollView, Text, TouchableOpacity, View, Modal, TextInput, FlatList, Alert, Platform, ToastAndroid } from 'react-native';
+import { Colors } from '@/constants/Colors';
+import * as Calendar from 'expo-calendar';
+import * as Notifications from 'expo-notifications';
+import * as Contacts from 'expo-contacts';
+import * as Clipboard from 'expo-clipboard';
+import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
 
-const PROFILE_STORAGE_KEY = 'asana_profile';
-const DEFAULT_PROFILE = {
-  name: 'James Doe',
-  email: 'james@futurist.com',
-  plan: 'Pro',
-  profileImage: require('../../assets/images/home2.webp'),
+
+// Theme context for app-wide theme switching
+const ThemeContext = createContext({ theme: 'light', setTheme: (_: string) => {} });
+
+export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
+  const [theme, setTheme] = useState('light');
+  const value = React.useMemo(() => ({ theme, setTheme }), [theme, setTheme]);
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 };
 
-const HEADER_IMAGE = require('../../assets/images/explore.webp');
-const fallbackImage = require('../../assets/images/home2.webp');
-const router = useRouter();
-
-
-
 const Explore = () => {
-  const [profile, setProfile] = useState(DEFAULT_PROFILE);
-  const [loading, setLoading] = useState(true);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [editName, setEditName] = useState('');
-  const [editEmail, setEditEmail] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
-  // Teammates CRUD state
-  type Teammate = { id: number; name: string; img: any };
-  const [teammates, setTeammates] = useState<Teammate[]>([]);
-  const [teammatesLoading, setTeammatesLoading] = useState(true);
-  const [inviteName, setInviteName] = useState('');
-  const [inviteModal, setInviteModal] = useState(false);
-  const [inviteError, setInviteError] = useState('');
+  const { setTheme, theme } = useContext(ThemeContext);
+  const systemColorScheme = useSystemColorScheme();
+  const router = useRouter();
+  // Invite modal state
+  const [inviteModalVisible, setInviteModalVisible] = useState(false);
+  const [inviteInput, setInviteInput] = useState('');
+  const [invitees, setInvitees] = useState<string[]>([]);
+  // Theme modal state
+  const [themeModalVisible, setThemeModalVisible] = useState(false);
+  // Language modal state
+  // DND modal state
+  const [dndModalVisible, setDndModalVisible] = useState(false);
+  // Push notification modal state
+  const [pushModalVisible, setPushModalVisible] = useState(false);
+  // Licenses modal state
 
-  // Load profile from AsyncStorage
-  useEffect(() => {
-    (async () => {
-      try {
-        const stored = await AsyncStorage.getItem(PROFILE_STORAGE_KEY);
-        if (stored) setProfile(JSON.parse(stored));
-      } catch {}
-      setLoading(false);
-    })();
-  }, []);
-
-  // Save profile to AsyncStorage
-  const saveProfile = useCallback(async (updates: Partial<typeof DEFAULT_PROFILE>) => {
-    setProfile((prev) => {
-      const next = { ...prev, ...updates };
-      AsyncStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(next));
-      return next;
-    });
-  }, []);
-
-  // Open modal with current profile
-  const openEditModal = () => {
-    setEditName(profile.name);
-    setEditEmail(profile.email);
-    setModalVisible(true);
-  };
-
-  // Save edits
-  const handleSave = async () => {
-    setSaving(true);
-    await saveProfile({ name: editName, email: editEmail });
-    setSaving(false);
-    setModalVisible(false);
-  };
-
-  // Fetch teammates from a free API (jsonplaceholder)
-  useEffect(() => {
-    setTeammatesLoading(true);
-    fetch('https://jsonplaceholder.typicode.com/users?_limit=6')
-      .then(res => res.json())
-      .then((data: any[]) => {
-        setTeammates(data.map((u: any) => ({
-          id: u.id,
-          name: u.name.split(' ')[0],
-          img: require('../../assets/images/home2.webp'), // fallback, could randomize
-        })));
-        setTeammatesLoading(false);
-      })
-      .catch(() => setTeammatesLoading(false));
-  }, []);
-
-  // Add teammate (simulate API)
-  const handleInvite = async () => {
-    if (!inviteName.trim()) {
-      setInviteError('Name required');
+  // Handler: Invite
+  const handleInvite = () => setInviteModalVisible(true);
+  const handleSendInvite = () => {
+    if (!inviteInput.trim()) {
+      Alert.alert('No information provided', 'Please provide at least one piece of information.');
       return;
     }
-    // Simulate POST to API
-    try {
-      const res = await fetch('https://jsonplaceholder.typicode.com/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: inviteName }),
-      });
-      const data = await res.json();
-      setTeammates(prev => [
-        ...prev,
-        { id: typeof data.id === 'number' ? data.id : Math.floor(Date.now()), name: inviteName.trim(), img: require('../../assets/images/home2.webp') },
-      ]);
-      setInviteName('');
-      setInviteModal(false);
-      setInviteError('');
-    } catch {
-      setInviteError('Failed to invite. Try again.');
+    setInvitees([...invitees, inviteInput.trim()]);
+    setInviteInput('');
+    Alert.alert('Invite sent', 'Invitee added to My workspace.');
+  };
+  // Handler: Pick contact from device
+  const handlePickContact = async () => {
+    const { status } = await Contacts.requestPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission denied', 'Cannot access contacts without permission.');
+      return;
+    }
+    const { data } = await Contacts.presentFormAsync();
+    if (data && data.length > 0) {
+      const contact = data[0];
+      let email = '';
+      if (contact.emails && contact.emails.length > 0) {
+        email = contact.emails[0].email;
+      } else if (contact.phoneNumbers && contact.phoneNumbers.length > 0) {
+        email = contact.phoneNumbers[0].number;
+      }
+      if (email) {
+        setInvitees([...invitees, email]);
+        Alert.alert('Invite sent', `${email} added to My workspace.`);
+      } else {
+        Alert.alert('No email or phone', 'Selected contact has no email or phone number.');
+      }
     }
   };
 
-  // Remove teammate (simulate API)
-  const handleRemoveTeammate = async (id: number) => {
-    // Simulate DELETE to API
-    try {
-      await fetch(`https://jsonplaceholder.typicode.com/users/${id}`, { method: 'DELETE' });
-      setTeammates(prev => prev.filter(tm => tm.id !== id));
-    } catch {
-      // fallback: still remove locally
-      setTeammates(prev => prev.filter(tm => tm.id !== id));
+  // Handler: Billing
+  const handleBilling = () => router.push('/(auth)/Billing');
+
+  // Handler: DND
+  const handleDND = () => setDndModalVisible(true);
+
+  // DND actions
+  const handleDndHour = async () => {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Do Not Disturb Ended',
+        body: 'Your 1 hour DND is over.',
+      },
+      trigger: { seconds: 3600, repeats: false, type: 'timeInterval' } as any,
+    });
+    setDndModalVisible(false);
+    Alert.alert('DND Set', 'You will be reminded in 1 hour.');
+  };
+  const handleDndTomorrow = async () => {
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(now.getDate() + 1);
+    tomorrow.setHours(9, 0, 0, 0); // 9am next day
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Do Not Disturb Ended',
+        body: 'Your DND until tomorrow is over.',
+      },
+      trigger: {
+        hour: 9,
+        minute: 0,
+        day: tomorrow.getDate(),
+        month: tomorrow.getMonth() + 1,
+        year: tomorrow.getFullYear(),
+        repeats: false,
+        type: 'calendar',
+      } as any,
+    });
+    setDndModalVisible(false);
+    Alert.alert('DND Set', 'You will be reminded tomorrow at 9am.');
+  };
+  const handleDndCalendar = async () => {
+    const { status } = await Calendar.requestCalendarPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission denied', 'Cannot access calendar without permission.');
+      return;
     }
+    // Open the default calendar app (best effort, as Expo cannot open calendar picker directly)
+    if (Platform.OS === 'ios') {
+      Linking.openURL('calshow://');
+    } else {
+      Linking.openURL('content://com.android.calendar/time/');
+    }
+    setDndModalVisible(false);
   };
 
-  if (loading) return <ActivityIndicator size="large" color="#668cff" style={{ marginTop: 40 }} />;
+  // Handler: Push notifications
+  const handlePush = () => setPushModalVisible(true);
+
+  // Handler: Android guide
+  const handleAndroidGuide = () => Linking.openURL('https://your-app-website.com');
+
+  // Handler: Contact support
+  const handleContactSupport = () => Linking.openURL('https://your-app-website.com/help-center');
+
+  // Handler: Display setting
+  const handleTheme = () => setThemeModalVisible(true);
+  const handleThemeSelect = (selected: string) => {
+    setTheme(selected);
+    setThemeModalVisible(false);
+  };
+
+  // Determine colors based on theme selection
+  let colorMode: 'light' | 'dark' = 'light';
+  if (theme === 'dark') colorMode = 'dark';
+  else if (theme === 'system') colorMode = systemColorScheme === 'dark' ? 'dark' : 'light';
+  const themeColors = Colors[colorMode];
+
+  // Handler: Language
+
+  // Handler: Privacy Policy
+  const handlePrivacy = () => Linking.openURL('https://your-app-website.com/privacy');
+
+  // Handler: Terms of Service
+  const handleTerms = () => Linking.openURL('https://your-app-website.com/terms');
+
+  // Handler: Licenses
+
+  // Handler: App version
+  const handleAppVersion = () => {
+    Clipboard.setStringAsync('8.54.5 (8540500)');
+    if (Platform.OS === 'android') ToastAndroid.show('Version copied!', ToastAndroid.SHORT);
+    else Alert.alert('Copied', 'Version copied to clipboard.');
+  };
+  // Removed unused profile state
+  // Removed unused editName state
+  // Card and title colors for light/dark theme
+  const cardBg = colorMode === 'light' ? '#fff' : themeColors.background;
+  const cardText = colorMode === 'light' ? '#11181C' : themeColors.text;
+  const titleColor = colorMode === 'light' ? '#687076' : themeColors.icon;
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#f7faff' }}>
-      {/* Header with image and overlay */}
-      <View style={styles.headerContainer}>
-        <Image source={HEADER_IMAGE} style={styles.headerImage} resizeMode="cover" />
-        <View style={styles.headerDarkOverlay} />
-        {/* Notification bell */}
-        <TouchableOpacity style={styles.bellBtn}>
-          <FontAwesome name="bell" size={22} color="#fff" />
-        </TouchableOpacity>
-        {/* Profile Card overlays header */}
-        <View style={styles.profileCard}>
-          <View style={styles.avatarContainer}>
-            <Image source={profile.profileImage || fallbackImage} style={styles.avatar} />
-            <TouchableOpacity style={styles.avatarEditBtn} onPress={openEditModal}>
-              <FontAwesome name="edit" size={16} color="#fff" />
-            </TouchableOpacity>
-          </View>
-          {/* Use a fallback and improved display for the user's name */}
-          <View style={styles.profileNameWrap}>
-            <Text
-              style={styles.profileName}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              adjustsFontSizeToFit
-              minimumFontScale={0.7}
-            >
-              {profile.name && profile.name.trim().length > 0 ? profile.name : 'Your Name'}
-            </Text>
-          </View>
-          <View style={styles.badgeRow}>
-            <View style={styles.planBadge}>
-              <Text style={styles.planBadgeText}>{profile.plan || 'Free'}</Text>
+    <View style={{ flex: 1, backgroundColor: themeColors.background }}>
+      {/* Top right user initials icon */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 32, marginBottom: 8 }}>
+        <Text style={{ color: cardText, fontWeight: 'bold', fontSize: 30, letterSpacing: 0.2 }}>Account</Text>
+        <View style={{ backgroundColor: themeColors.tint, borderRadius: 16, width: 36, height: 36, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: themeColors.background, shadowColor: themeColors.tint, shadowOpacity: 0.3, shadowRadius: 6, elevation: 4 }}>
+          <Text style={{ color: themeColors.background, fontWeight: 'bold', fontSize: 16 }}>SY</Text>
+        </View>
+      </View>
+      {/* All cards scrollable, organizations title starts at top */}
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 0, paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
+        {/* Organizations Section */}
+        <View>
+          <Text style={{ color: titleColor, fontWeight: '600', fontSize: 15, marginBottom: 8 }}>Organizations</Text>
+          <View style={{ backgroundColor: cardBg, borderRadius: 12, marginBottom: 24, padding: 16, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                <FontAwesome name="building" size={20} color={cardText} style={{ marginRight: 14 }} />
+                <View style={{ flexShrink: 1 }}>
+                  <Text style={{ color: cardText, fontSize: 17, fontWeight: '700', marginBottom: 2 }}>My workspace</Text>
+                  <Text style={{ color: titleColor, fontSize: 14 }} numberOfLines={1}>screw.yt18@gmail.com</Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                style={{ backgroundColor: '#668cff', borderRadius: 8, paddingVertical: 6, paddingHorizontal: 18, alignItems: 'center', justifyContent: 'center', height: 32, minWidth: 70 }}
+                onPress={handleInvite}
+              >
+                <Text style={{ color: cardBg, fontWeight: 'bold', fontSize: 15, textAlign: 'center', letterSpacing: 0.5 }}>Invite</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
-      </View>
-      {/* Main content */}
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
-        {/* Teammates row */}
-        <View style={styles.teammatesRow}>
-          <Text style={styles.sectionTitle}>Teammates</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.teammatesScroll}>
-            {teammatesLoading ? (
-              <ActivityIndicator size="small" color="#668cff" style={{ marginRight: 16 }} />
-            ) : (
-              teammates.map((tm) => (
-                <View key={tm.id} style={styles.teammateItem}>
-                  <Image source={tm.img} style={styles.teammateAvatar} />
-                  <Text style={styles.teammateName}>{tm.name}</Text>
-                  <TouchableOpacity style={styles.removeTeammateBtn} onPress={() => handleRemoveTeammate(tm.id)}>
-                    <FontAwesome name="close" size={14} color="#fff" accessibilityLabel="Remove teammate" accessibilityRole="button" />
-                  </TouchableOpacity>
-                </View>
-              ))
-            )}
-            <TouchableOpacity style={styles.inviteBtn} onPress={() => setInviteModal(true)}>
-              <FontAwesome name="plus" size={18} color="#668cff" />
-              <Text style={styles.inviteBtnText}>Invite</Text>
+        {/* Plan Section */}
+        <View>
+          <Text style={{ color: titleColor, fontWeight: '600', fontSize: 15, marginBottom: 8 }}>Plan</Text>
+          <TouchableOpacity onPress={handleBilling} activeOpacity={0.8} style={{ backgroundColor: cardBg, borderRadius: 12, marginBottom: 24, padding: 16, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <FontAwesome name="users" size={20} color={cardText} style={{ marginRight: 14 }} />
+              <View>
+                <Text style={{ color: cardText, fontSize: 17, fontWeight: '700', marginBottom: 2 }}>Asana Personal</Text>
+                <Text style={{ color: titleColor, fontSize: 14 }} numberOfLines={1}>10 seats</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </View>
+        {/* Notifications Section */}
+        <View>
+          <Text style={{ color: titleColor, fontWeight: '600', fontSize: 15, marginBottom: 8 }}>Notifications</Text>
+          <View style={{ backgroundColor: cardBg, borderRadius: 12, marginBottom: 24, padding: 16, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 }}>
+            <TouchableOpacity onPress={handleDND} activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+              <FontAwesome name="bed" size={20} color={cardText} style={{ marginRight: 14 }} />
+              <Text style={{ color: cardText, fontSize: 16, fontWeight: '600', flex: 1 }}>Do not disturb</Text>
+              <Text style={{ color: titleColor, fontSize: 14 }}>Off</Text>
             </TouchableOpacity>
-          </ScrollView>
+            <View style={{ height: 1, backgroundColor: '#3a3b3c', marginVertical: 6, alignSelf: 'stretch', width: '100%' }} />
+            <TouchableOpacity onPress={handlePush} activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <FontAwesome name="bell" size={20} color={cardText} style={{ marginRight: 14 }} />
+              <Text style={{ color: cardText, fontSize: 16, fontWeight: '600', flex: 1 }}>Push notifications</Text>
+              <Text style={{ color: titleColor, fontSize: 14 }}>Manage</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-        {/* Account/Settings section */}
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>Account & Settings</Text>
-          <View style={styles.infoRow}><Text style={styles.label}>Email</Text><Text style={styles.value}>{profile.email || 'No Email'}</Text></View>
-          <View style={styles.infoRow}><Text style={styles.label}>Plan</Text><Text style={styles.value}>{profile.plan || 'Free'}</Text></View>
-          <View style={styles.infoRow}><Text style={styles.label}>Notifications</Text><Text style={styles.value}>Enabled</Text></View>
-          <View style={styles.infoRow}><Text style={styles.label}>Theme</Text><Text style={styles.value}>Light</Text></View>
-          <View style={styles.infoRow}><Text style={styles.label}>Language</Text><Text style={styles.value}>English</Text></View>
-          <View style={styles.infoRow}><Text style={styles.label}>App Version</Text><Text style={styles.value}>12.0.0</Text></View>
+        {/* Support Section */}
+        <View>
+          <Text style={{ color: titleColor, fontWeight: '600', fontSize: 15, marginBottom: 8 }}>Support</Text>
+          <View style={{ backgroundColor: cardBg, borderRadius: 12, marginBottom: 24, padding: 16, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 }}>
+            <TouchableOpacity onPress={handleAndroidGuide} activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+              <FontAwesome name="info-circle" size={20} color={cardText} style={{ marginRight: 14 }} />
+              <Text style={{ color: cardText, fontSize: 16, fontWeight: '600', flex: 1 }}>Android guide</Text>
+            </TouchableOpacity>
+            <View style={{ height: 1, backgroundColor: '#3a3b3c', marginVertical: 6, alignSelf: 'stretch', width: '100%' }} />
+            <TouchableOpacity onPress={handleContactSupport} activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <FontAwesome name="question-circle" size={20} color={cardText} style={{ marginRight: 14 }} />
+              <Text style={{ color: cardText, fontSize: 16, fontWeight: '600', flex: 1 }}>Contact support</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-        {/* Common settings actions */}
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>Actions</Text>
-          <TouchableOpacity
-  style={styles.actionBtnFull}
-  onPress={() => router.push('/(auth)/changepass')} // Adjust path if needed
->
-  <FontAwesome name="lock" size={16} color="#fff" />
-  <Text style={styles.actionBtnText}>Change Password</Text>
-</TouchableOpacity>
-
-         <TouchableOpacity
-  style={styles.actionBtnFull}
-  onPress={async () => {
-    await AsyncStorage.clear(); // Optional: clear stored profile/settings
-    router.replace('/(auth)/AuthScreen');   // Navigate to AuthScreen
-  }}
->
-  <FontAwesome name="sign-out" size={16} color="#fff" />
-  <Text style={styles.actionBtnText}>Log Out</Text>
-</TouchableOpacity>
-
-         <TouchableOpacity
-  style={styles.actionBtnFull}
-  onPress={() => setDeleteConfirmVisible(true)}
->
-  <FontAwesome name="trash" size={16} color="#fff" />
-  <Text style={styles.actionBtnText}>Delete Account</Text>
-</TouchableOpacity>
-
+        {/* App Section */}
+        <View>
+          <Text style={{ color: titleColor, fontWeight: '600', fontSize: 15, marginBottom: 8 }}>App</Text>
+          <View style={{ backgroundColor: cardBg, borderRadius: 12, marginBottom: 24, padding: 16, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 }}>
+            <TouchableOpacity onPress={handleTheme} activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+              <FontAwesome name="moon-o" size={20} color={cardText} style={{ marginRight: 14 }} />
+              <Text style={{ color: cardText, fontSize: 16, fontWeight: '600', flex: 1 }}>Display setting</Text>
+            </TouchableOpacity>
+            <View style={{ height: 1, backgroundColor: '#3a3b3c', marginVertical: 6, alignSelf: 'stretch', width: '100%' }} />
+            <TouchableOpacity onPress={handlePrivacy} activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+              <FontAwesome name="eye" size={20} color={cardText} style={{ marginRight: 14 }} />
+              <Text style={{ color: cardText, fontSize: 16, fontWeight: '600', flex: 1 }}>Privacy policy</Text>
+            </TouchableOpacity>
+            <View style={{ height: 1, backgroundColor: '#3a3b3c', marginVertical: 6, alignSelf: 'stretch', width: '100%' }} />
+            <TouchableOpacity onPress={handleTerms} activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+              <FontAwesome name="cogs" size={20} color={cardText} style={{ marginRight: 14 }} />
+              <Text style={{ color: cardText, fontSize: 16, fontWeight: '600', flex: 1 }}>Terms of service</Text>
+            </TouchableOpacity>
+            <View style={{ height: 1, backgroundColor: '#3a3b3c', marginVertical: 6, alignSelf: 'stretch', width: '100%' }} />
+            <TouchableOpacity onPress={handleAppVersion} activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+              <FontAwesome name="mobile" size={20} color={cardText} style={{ marginRight: 14 }} />
+              <Text style={{ color: cardText, fontSize: 16, fontWeight: '600', flex: 1 }}>App version</Text>
+              <Text style={{ color: titleColor, fontSize: 14, marginLeft: 8 }}>8.54.5 (8540500)</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
-      {/* Modal for editing profile */}
-      <Modal visible={modalVisible} animationType="fade" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Edit Profile</Text>
+      {/* Invite Modal */}
+      <Modal visible={inviteModalVisible} animationType="slide" transparent onRequestClose={() => setInviteModalVisible(false)}>
+        <View style={{ flex: 1, backgroundColor: '#000a', justifyContent: 'flex-end' }}>
+          <View style={{ backgroundColor: '#23252b', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, minHeight: 320 }}>
+            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>Invite to My workspace</Text>
             <TextInput
-              value={editName}
-              onChangeText={setEditName}
-              placeholder="Name"
-              style={styles.input}
-              placeholderTextColor="#888"
-            />
-            <TextInput
-              value={editEmail}
-              onChangeText={setEditEmail}
-              placeholder="Email"
-              style={styles.input}
-              placeholderTextColor="#888"
+              placeholder="Enter email or contact"
+              placeholderTextColor="#b0b3b8"
+              value={inviteInput}
+              onChangeText={setInviteInput}
+              style={{ backgroundColor: '#181a20', color: '#fff', borderRadius: 8, padding: 12, marginBottom: 12, fontSize: 16 }}
               keyboardType="email-address"
               autoCapitalize="none"
             />
-            <View style={styles.modalActions}>
-              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.cancelBtn}>
-                <Text style={{ color: '#668cff', fontWeight: 'bold' }}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleSave} style={styles.saveBtn} disabled={saving}>
-                {saving ? <ActivityIndicator color="#fff" /> : <Text style={{ color: '#fff', fontWeight: 'bold' }}>Save</Text>}
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              style={{ backgroundColor: '#3a3b3c', borderRadius: 16, paddingVertical: 10, alignItems: 'center', marginBottom: 12 }}
+              onPress={handlePickContact}
+            >
+              <Text style={{ color: '#fff', fontWeight: '600', fontSize: 15 }}>Pick from Contacts</Text>
+            </TouchableOpacity>
+            <FlatList
+              data={invitees}
+              keyExtractor={(item, idx) => item + idx}
+              renderItem={({ item }) => (
+                <Text style={{ color: '#b0b3b8', fontSize: 15, marginBottom: 4 }}>{item}</Text>
+              )}
+              ListEmptyComponent={<Text style={{ color: '#b0b3b8', fontSize: 15, marginBottom: 4 }}>No invitees yet.</Text>}
+              style={{ maxHeight: 80, marginBottom: 16 }}
+            />
+            <TouchableOpacity
+              style={{ backgroundColor: '#668cff', borderRadius: 24, paddingVertical: 12, alignItems: 'center', marginTop: 8 }}
+              onPress={handleSendInvite}
+            >
+              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 17 }}>Send Invite</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setInviteModalVisible(false)} style={{ alignItems: 'center', marginTop: 16 }}>
+              <Text style={{ color: '#b0b3b8', fontSize: 15 }}>Cancel</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
-      <Modal visible={deleteConfirmVisible} animationType="fade" transparent>
-  <View style={styles.modalOverlay}>
-    <View style={styles.modalContent}>
-      <Text style={styles.modalTitle}>Delete Account</Text>
-      <Text style={{ fontSize: 16, color: '#444', marginBottom: 16 }}>
-        Are you sure you want to delete your account? This action cannot be undone.
-      </Text>
-      <View style={styles.modalActions}>
-        <TouchableOpacity onPress={() => setDeleteConfirmVisible(false)} style={styles.cancelBtn}>
-          <Text style={{ color: '#668cff', fontWeight: 'bold' }}>Cancel</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={async () => {
-            // Clear teammates
-            setTeammates([]);
-
-            // Reset profile
-            const reset = {
-              ...DEFAULT_PROFILE,
-              name: '',
-              email: '',
-            };
-            await AsyncStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(reset));
-            setProfile(reset);
-
-            // Close modal
-            setDeleteConfirmVisible(false);
-          }}
-          style={styles.saveBtn}
-        >
-          <Text style={{ color: '#fff', fontWeight: 'bold' }}>Yes, Delete</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  </View>
-</Modal>
-
-      {/* Invite Modal */}
-      <Modal visible={inviteModal} animationType="fade" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Invite Teammate</Text>
-            <TextInput
-              value={inviteName}
-              onChangeText={setInviteName}
-              placeholder="Enter teammate email "
-              style={styles.input}
-              placeholderTextColor="#888"
-            />
-            {inviteError ? <Text style={{ color: 'red', marginBottom: 8 }}>{inviteError}</Text> : null}
-            <View style={styles.modalActions}>
-              <TouchableOpacity onPress={() => { setInviteModal(false); setInviteError(''); }} style={styles.cancelBtn}>
-                <Text style={{ color: '#668cff', fontWeight: 'bold' }}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleInvite} style={styles.saveBtn}>
-                <Text style={{ color: '#fff', fontWeight: 'bold' }}>Invite</Text>
-              </TouchableOpacity>
-            </View>
+      {/* DND Modal */}
+      <Modal visible={dndModalVisible} animationType="slide" transparent onRequestClose={() => setDndModalVisible(false)}>
+        <View style={{ flex: 1, backgroundColor: '#000a', justifyContent: 'flex-end' }}>
+          <View style={{ backgroundColor: '#23252b', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, minHeight: 220 }}>
+            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>Do Not Disturb</Text>
+            <Text style={{ color: '#b0b3b8', fontSize: 15, marginBottom: 8 }}>Pause notifications for:</Text>
+            <TouchableOpacity onPress={handleDndHour} style={{ backgroundColor: '#181a20', borderRadius: 8, padding: 12, marginBottom: 8 }}>
+              <Text style={{ color: '#fff', fontSize: 16 }}>1 hour</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleDndTomorrow} style={{ backgroundColor: '#181a20', borderRadius: 8, padding: 12, marginBottom: 8 }}>
+              <Text style={{ color: '#fff', fontSize: 16 }}>Until tomorrow</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleDndCalendar} style={{ backgroundColor: '#181a20', borderRadius: 8, padding: 12, marginBottom: 8 }}>
+              <Text style={{ color: '#fff', fontSize: 16 }}>Pick date from calendar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setDndModalVisible(false)} style={{ alignItems: 'center', marginTop: 16 }}>
+              <Text style={{ color: '#b0b3b8', fontSize: 15 }}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      {/* Push Notifications Modal */}
+      <Modal visible={pushModalVisible} animationType="slide" transparent onRequestClose={() => setPushModalVisible(false)}>
+        <View style={{ flex: 1, backgroundColor: '#000a', justifyContent: 'flex-end' }}>
+          <View style={{ backgroundColor: '#23252b', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, minHeight: 220 }}>
+            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>Push Notifications</Text>
+            <TouchableOpacity style={{ backgroundColor: '#181a20', borderRadius: 8, padding: 12, marginBottom: 8 }}>
+              <Text style={{ color: '#fff', fontSize: 16 }}>Mentions & Activity</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={{ backgroundColor: '#181a20', borderRadius: 8, padding: 12, marginBottom: 8 }}>
+              <Text style={{ color: '#fff', fontSize: 16 }}>Direct messages</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={{ backgroundColor: '#181a20', borderRadius: 8, padding: 12, marginBottom: 8 }}>
+              <Text style={{ color: '#fff', fontSize: 16 }}>All activity</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setPushModalVisible(false)} style={{ alignItems: 'center', marginTop: 16 }}>
+              <Text style={{ color: '#b0b3b8', fontSize: 15 }}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      {/* Theme Modal */}
+      <Modal visible={themeModalVisible} animationType="slide" transparent onRequestClose={() => setThemeModalVisible(false)}>
+        <View style={{ flex: 1, backgroundColor: '#000a', justifyContent: 'flex-end' }}>
+          <View style={{ backgroundColor: '#23252b', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, minHeight: 220 }}>
+            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>Select Theme</Text>
+            <TouchableOpacity onPress={() => handleThemeSelect('light')} style={{ backgroundColor: '#181a20', borderRadius: 8, padding: 12, marginBottom: 8 }}>
+              <Text style={{ color: '#fff', fontSize: 16 }}>Light</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleThemeSelect('dark')} style={{ backgroundColor: '#181a20', borderRadius: 8, padding: 12, marginBottom: 8 }}>
+              <Text style={{ color: '#fff', fontSize: 16 }}>Dark</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleThemeSelect('system')} style={{ backgroundColor: '#181a20', borderRadius: 8, padding: 12, marginBottom: 8 }}>
+              <Text style={{ color: '#fff', fontSize: 16 }}>System Default</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setThemeModalVisible(false)} style={{ alignItems: 'center', marginTop: 16 }}>
+              <Text style={{ color: '#b0b3b8', fontSize: 15 }}>Cancel</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
     </View>
   );
-};
+}
 
 export default Explore;
-
-const styles = StyleSheet.create({
-  headerContainer: {
-    width: '100%',
-    height: 260,
-    position: 'relative',
-    backgroundColor: '#222',
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
-    overflow: 'hidden',
-    marginBottom: 0,
-  },
-  headerImage: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-  },
-  headerDarkOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.32)',
-  },
-  profileCard: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: -60,
-    backgroundColor: '#fff',
-    borderRadius: 24,
-    alignItems: 'center',
-    paddingTop: 60,
-    paddingBottom: 24,
-    paddingHorizontal: 18,
-    shadowColor: '#668cff',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.13,
-    shadowRadius: 16,
-    elevation: 8,
-    zIndex: 2,
-  },
-  avatarContainer: {
-    position: 'absolute',
-    top: -45,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    zIndex: 3,
-  },
-  avatar: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    borderWidth: 3,
-    borderColor: '#fff',
-    backgroundColor: '#e6e6e6',
-  },
-  avatarEditBtn: {
-    position: 'absolute',
-    right: -6,
-    bottom: 0,
-    backgroundColor: '#668cff',
-    borderRadius: 16,
-    padding: 6,
-    borderWidth: 2,
-    borderColor: '#fff',
-    zIndex: 2,
-  },
-  profileNameWrap: {
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 12,
-    marginBottom: 18, // Increased padding bottom for more space below the name
-    paddingHorizontal: 10,
-  },
-  profileName: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#222',
-    textAlign: 'center',
-    maxWidth: 220,
-    width: '100%',
-    letterSpacing: 0.1,
-  },
-  badgeRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 4,
-    marginBottom: 0,
-  },
-  planBadge: {
-    backgroundColor: '#668cff',
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 4,
-    alignSelf: 'center',
-    marginTop: 0,
-    marginBottom: 0,
-  },
-  planBadgeText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 13,
-    letterSpacing: 0.5,
-  },
-  sectionCard: {
-    backgroundColor: '#fff',
-    borderRadius: 18,
-    padding: 20,
-    marginHorizontal: 16,
-    marginTop: 80,
-    marginBottom: 0,
-    shadowColor: '#668cff',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 1,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#222',
-    marginBottom: 10,
-    alignSelf: 'flex-start',
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  label: {
-    color: '#888',
-    fontSize: 14,
-    marginTop: 8,
-    alignSelf: 'flex-start',
-  },
-  value: {
-    color: '#222',
-    fontSize: 16,
-    fontWeight: '600',
-    alignSelf: 'flex-start',
-  },
-  actionBtnFull: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#668cff',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 18,
-    marginTop: 12,
-    alignSelf: 'stretch',
-    justifyContent: 'center',
-    gap: 10,
-    shadowColor: '#668cff',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  actionBtnText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    marginLeft: 8,
-    fontSize: 16,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    width: '90%',
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 10,
-  },
-  modalTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    color: '#222',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#e6e6e6',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 12,
-    fontSize: 16,
-    backgroundColor: '#f7faff',
-  },
-  modalActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginTop: 8,
-    gap: 12,
-  },
-  cancelBtn: {
-    paddingVertical: 10,
-    paddingHorizontal: 18,
-    borderRadius: 8,
-    backgroundColor: '#f7faff',
-    marginRight: 8,
-  },
-  saveBtn: {
-    paddingVertical: 10,
-    paddingHorizontal: 18,
-    borderRadius: 8,
-    backgroundColor: '#668cff',
-    shadowColor: '#668cff',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.7,
-    shadowRadius: 10,
-    elevation: 10,
-  },
-  bellBtn: {
-    position: 'absolute',
-    top: 36,
-    right: 24,
-    zIndex: 10,
-    backgroundColor: 'rgba(0,0,0,0.18)',
-    padding: 10,
-    borderRadius: 20,
-  },
-  teammatesRow: {
-    marginTop: 80,
-    marginBottom: 0,
-    paddingHorizontal: 16,
-  },
-  teammatesScroll: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  teammateItem: {
-    alignItems: 'center',
-    marginRight: 18,
-    position: 'relative',
-  },
-  teammateAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#e6e6e6',
-    marginBottom: 4,
-  },
-  teammateName: {
-    fontSize: 13,
-    color: '#222',
-    fontWeight: '600',
-    maxWidth: 60,
-    textAlign: 'center',
-  },
-  removeTeammateBtn: {
-    position: 'absolute',
-    top: -8,
-    right: -8,
-    backgroundColor: '#ff4d4f',
-    borderRadius: 10,
-    padding: 2,
-    zIndex: 5,
-  },
-  inviteBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: '#668cff',
-    borderRadius: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    marginLeft: 8,
-    backgroundColor: '#fff',
-    height: 48,
-    alignSelf: 'center',
-  },
-  inviteBtnText: {
-    color: '#668cff',
-    fontWeight: 'bold',
-    marginLeft: 6,
-    fontSize: 15,
-  },
-});

@@ -2,8 +2,6 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-const [dropdownVisible, setDropdownVisible] = useState(false);
-const [unreadCount, setUnreadCount] = useState(0);
 const demoMessages = [
   { id: '1', user: 'James', text: 'Welcome to the team chat!', timestamp: '2025-06-12T09:00:00Z' },
   { id: '2', user: 'Sarah', text: 'Let’s discuss the new feature.', timestamp: '2025-06-12T09:05:00Z' },
@@ -13,6 +11,7 @@ const demoMessages = [
 const INBOX_STORAGE_KEY = 'asana_inbox';
 
 const Inbox = () => {
+  const [unreadCount, setUnreadCount] = useState(0);
   const [messages, setMessages] = useState(demoMessages);
   const [loading, setLoading] = useState(false);
   const [input, setInput] = useState('');
@@ -20,7 +19,6 @@ const Inbox = () => {
   const [editText, setEditText] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const flatListRef = useRef<FlatList>(null);
-
   useEffect(() => {
     const loadMessages = async () => {
       setLoading(true);

@@ -3,10 +3,25 @@ import React from 'react';
 import { Platform } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+
+const ExploreTabBarIcon = ({ color }: { color: string }) => (
+  <FontAwesome size={24} name="user" color={color} />
+);
+
+const HomeTabBarIcon = ({ color }: { color: string }) => (
+  <FontAwesome size={26} name="home" color={color} />
+);
+
+const TasksTabBarIcon = ({ color }: { color: string }) => (
+  <FontAwesome size={24} name="check-square" color={color} />
+);
+
+const InboxTabBarIcon = ({ color }: { color: string }) => (
+  <FontAwesome size={24} name="bell" color={color} />
+);
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -37,7 +52,7 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           headerShown: false,
-          tabBarIcon: ({ color }) => <FontAwesome size={26} name="home" color={color} />,
+          tabBarIcon: HomeTabBarIcon,
           tabBarLabelStyle: { fontWeight: '700', fontSize: 13, letterSpacing: 0.5, marginBottom: 2 },
           tabBarItemStyle: { paddingVertical: 6, marginHorizontal: 2 },
         }}
@@ -47,7 +62,7 @@ export default function TabLayout() {
         options={{
           title: 'Tasks',
           headerShown: false,
-          tabBarIcon: ({ color }) => <FontAwesome size={24} name="check-square" color={color} />,
+          tabBarIcon: TasksTabBarIcon,
           tabBarLabelStyle: { fontWeight: '700', fontSize: 13, letterSpacing: 0.5, marginBottom: 2 },
           tabBarItemStyle: { paddingVertical: 6, marginHorizontal: 2 },
         }}
@@ -58,7 +73,7 @@ export default function TabLayout() {
         options={{
           title: 'Chat Room',
           headerShown: false,
-          tabBarIcon: ({ color }) => <FontAwesome size={24} name='bell' color={color} />,
+          tabBarIcon: InboxTabBarIcon,
           tabBarLabelStyle: { fontWeight: '700', fontSize: 13, letterSpacing: 0.5, marginBottom: 2 },
           tabBarItemStyle: { paddingVertical: 6, marginHorizontal: 2 },
         }}
@@ -68,7 +83,7 @@ export default function TabLayout() {
         options={{
           title: 'Account',
           headerShown: false,
-          tabBarIcon: ({ color }) => <FontAwesome size={24} name="user" color={color} />,
+          tabBarIcon: ExploreTabBarIcon,
           tabBarLabelStyle: { fontWeight: '700', fontSize: 13, letterSpacing: 0.5, marginBottom: 2 },
           tabBarItemStyle: { paddingVertical: 6, marginHorizontal: 2 },
         }}
