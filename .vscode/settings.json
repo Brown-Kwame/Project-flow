@@ -27,5 +27,6 @@
         "jsesc",
         "jsonplaceholder",
         "picocolors"
-    ]
+    ],
+    "git.ignoreLimitWarning": true
 }

@@ -1,6 +1,6 @@
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import React, { useState, useContext, createContext } from 'react';
+import React, { useState, useContext } from 'react';
 import { useColorScheme as useSystemColorScheme, ScrollView, Text, TouchableOpacity, View, Modal, TextInput, FlatList, Alert, Platform, ToastAndroid } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import * as Calendar from 'expo-calendar';
@@ -11,14 +11,7 @@ import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
 
 
-// Theme context for app-wide theme switching
-const ThemeContext = createContext({ theme: 'light', setTheme: (_: string) => {} });
-
-export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [theme, setTheme] = useState('light');
-  const value = React.useMemo(() => ({ theme, setTheme }), [theme, setTheme]);
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
-};
+import { ThemeContext } from './_layout';
 
 const Explore = () => {
   const { setTheme, theme } = useContext(ThemeContext);
