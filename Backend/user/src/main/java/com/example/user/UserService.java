@@ -10,6 +10,9 @@ import java.util.Optional;
 
 @Service
 public class UserService {
+    @Autowired
+    private EmailService emailService;
+
 
     @Autowired
     private UserRepository userRepository;
@@ -28,7 +31,10 @@ public class UserService {
         newUser.setLastName(lastName);
         newUser.setEmail(email);
         newUser.setPasswordHash(passwordEncoder.encode(plainPassword)); // Hash the password
-        return Optional.of(userRepository.save(newUser));
+        User savedUser = userRepository.save(newUser);
+        // Send welcome email
+        emailService.sendWelcomeEmail(email, firstName);
+        return Optional.of(savedUser);
     }
 
     // Authenticate a user

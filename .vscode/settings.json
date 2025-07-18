@@ -29,7 +29,8 @@
         "Mainindex",
         "nativewind",
         "picocolors",
-        "Pressable"
+        "Pressable",
+        "springframework"
     ],
     "git.ignoreLimitWarning": true
 }
