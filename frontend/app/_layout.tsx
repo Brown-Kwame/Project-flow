@@ -6,7 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import { ProjectProvider } from './context/ProjectContext';
 import { UserProvider, useUser } from './context/UserContext';
-import '../global.css'
+
 function AppNavigator() {
   const { isAuthenticated } = useUser();
   // When not authenticated, only show auth screens (Signin is always first
