@@ -1,92 +1,59 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, useRouter } from 'expo-router';
-import React, { useRef, useEffect, useState } from 'react';
+import { useRouter } from 'expo-router';
+import React, { useRef, useEffect, useContext } from 'react';
 import {
   Animated,
-  Dimensions,
   ScrollView,
   StyleSheet,
   Text,
   View,
   Image,
-  Easing,
+  TouchableOpacity,
+  useColorScheme,
 } from 'react-native';
-import HomeCard from '../components/HomeCard';
 import { useProjectContext } from '../context/ProjectContext';
 import { useUser } from '../context/UserContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BloomCard from '../components/BloomCard';
+import { ThemeContext } from './_layout';
+import { Colors } from '@/constants/Colors';
+// ...existing code...
 
-const CARD_COLORS = [
-  { bg: '#f7faff', iconBg: '#668cff22', icon: '#668cff' },
-  { bg: '#fff7f0', iconBg: '#ffb34722', icon: '#ffb347' },
-  { bg: '#f0f7ff', iconBg: '#e600ac22', icon: '#e600ac' },
-  { bg: '#f7fff7', iconBg: '#4caf5022', icon: '#4caf50' },
-  { bg: '#fff0f7', iconBg: '#f20d6922', icon: '#f20d69' },
-  { bg: '#f0f0ff', iconBg: '#b3000022', icon: '#b30000' },
-  { bg: '#f0fff7', iconBg: '#00bfae22', icon: '#00bfae' },
-];
+
 
 const Index = () => {
   const router = useRouter();
-  const { projects, streaks } = useProjectContext ? useProjectContext() : { projects: [], streaks: 0 };
-  const { profile } = useUser ? useUser() : { profile: {} };
-  type Task = { status?: string; [key: string]: any };
-  const [tasks, setTasks] = useState<Task[]>([]);
-  type Goal = { status?: string; [key: string]: any };
-  const [goals, setGoals] = useState<Goal[]>([]);
-  const [loading, setLoading] = useState(true);
+  useProjectContext();
+  useUser();
+  const { theme } = useContext(ThemeContext);
+  const systemColorScheme = useColorScheme();
+  let colorMode: 'light' | 'dark' = 'light';
+  if (theme === 'dark') colorMode = 'dark';
+  else if (theme === 'system') colorMode = systemColorScheme === 'dark' ? 'dark' : 'light';
+  const themeColors = Colors[colorMode];
 
-  useEffect(() => {
-    let mounted = true;
-    const fetchData = async () => {
-      setLoading(true);
+  // Unread notification count state
+  const [unreadCount, setUnreadCount] = React.useState(0);
+
+  // Fetch unread count from AsyncStorage (simulate notifications/messages)
+  React.useEffect(() => {
+    const fetchUnread = async () => {
       try {
-        const [tasksRaw, goalsRaw] = await Promise.all([
-          AsyncStorage.getItem('asana_tasks'),
-          AsyncStorage.getItem('asana_goals'),
-        ]);
-        if (mounted) {
-          setTasks(tasksRaw ? JSON.parse(tasksRaw) : []);
-          setGoals(goalsRaw ? JSON.parse(goalsRaw) : []);
+        const inbox = await AsyncStorage.getItem('asana_inbox');
+        if (inbox) {
+          const messages = JSON.parse(inbox);
+          // Count messages not sent by 'You' as unread (demo logic)
+          const unread = messages.filter((m: any) => m.user !== 'You').length;
+          setUnreadCount(unread);
+        } else {
+          setUnreadCount(3); // fallback demo value
         }
       } catch {
-        if (mounted) {
-          setTasks([]);
-          setGoals([]);
-        }
-      } finally {
-        if (mounted) setLoading(false);
+        setUnreadCount(3);
       }
     };
-    fetchData();
-    return () => { mounted = false; };
+    fetchUnread();
   }, []);
-
-  // Memoized summaries for performance
-  const projectSummary = React.useMemo(() => {
-    if (!projects) return 'No projects found.';
-    return `${projects.length} projects, ${streaks} day streak`;
-  }, [projects, streaks]);
-
-  const taskSummary = React.useMemo(() => {
-    if (!Array.isArray(tasks) || tasks.length === 0) return null;
-    const done = tasks.filter((t) => t && t.status === 'Done').length;
-    const overdue = tasks.filter((t) => t && t.status === 'Overdue').length;
-    const due = tasks.filter((t) => t && t.status !== 'Done').length;
-    return { total: tasks.length, done, overdue, due };
-  }, [tasks]);
-
-  const goalSummary = React.useMemo(() => {
-    if (!Array.isArray(goals) || goals.length === 0) return null;
-    const done = goals.filter((g) => g && g.status === 'Done').length;
-    const due = goals.filter((g) => g && g.status !== 'Done').length;
-    return { total: goals.length, done, due };
-  }, [goals]);
-
-  const dashboardSummary = React.useMemo(() => {
-    return `Analytics for ${projects.length} projects. See trends, status, and more.`;
-  }, [projects]);
 
   // Card data for each summary
   const bloomCards = [
@@ -134,38 +101,42 @@ const Index = () => {
         useNativeDriver: true,
       }),
     ]).start();
-  }, []);
+  }, [fadeAnim, scaleAnim]);
 
   return (
-    <View style={styles.container1}>
+    <View style={[styles.container1, { backgroundColor: themeColors.background }]}> {/* Theme-aware container */}
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         <Animated.View
-          style={[
-            styles.container2,
-            {
-              opacity: fadeAnim,
-              transform: [{ scale: scaleAnim }],
-            },
-          ]}
+          style={[styles.container2, { backgroundColor: colorMode === 'light' ? '#f7f9fc' : themeColors.background, shadowColor: themeColors.icon }]}
         >
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 30 }}>
-            <Image
-              source={require('../../assets/images/Icon.png')}
-              style={{ width: 32, height: 32, marginRight: 12 }}
-            />
-            <Text style={styles.brandTitle}>Project Flow</Text>
-          </View>
-          <View style={styles.introBox}>
-            <Text style={styles.introText}>
-              Get a quick overview of your projects, tasks, and goals. Use the cards below to dive into details, track progress, and stay organized every day.
-            </Text>
-          </View>
+          <View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 30 }}>
+              <Image
+                source={require('../../assets/images/Icon.png')}
+                style={{ width: 32, height: 32, marginRight: 12 }}
+              />
+              <Text style={[styles.brandTitle, { color: themeColors.text }]}>Project Flow</Text>
+              <View style={{ flex: 1 }} />
+              {/* Notification bell icon for direct messages */}
+              <TouchableOpacity onPress={() => router.push('/Inbox?section=direct-messages')} style={{ position: 'relative' }}>
+                <FontAwesome name='bell' size={24} style={{ marginLeft: 12 }} color={themeColors.tint} />
+                {unreadCount > 0 && (
+                  <View style={[styles.unreadBadge, { backgroundColor: '#ff4d4d', borderColor: themeColors.background }]}> {/* Badge color stays red for visibility */}
+                    <Text style={styles.unreadText}>{unreadCount}</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            </View>
+            <View style={[styles.introBox, { backgroundColor: colorMode === 'light' ? '#e6f0ff' : themeColors.icon }]}> {/* Theme-aware intro box */}
+              <Text style={[styles.introText, { color: themeColors.text }]}>Get a quick overview of your projects, tasks, and goals. Use the cards below to dive into details, track progress, and stay organized every day.</Text>
+            </View>
 
-          {/* Professional summary cards */}
-          <View style={{ width: '100%', alignItems: 'center', marginBottom: 24 }}>
-            {bloomCards.map((card) => (
-              <BloomCard key={card.title} {...card} />
-            ))}
+            {/* Professional summary cards */}
+            <View style={{ width: '100%', alignItems: 'center', marginBottom: 24 }}>
+              {bloomCards.map((card) => (
+                <BloomCard key={card.title} {...card} />
+              ))}
+            </View>
           </View>
         </Animated.View>
       </ScrollView>
@@ -175,54 +146,54 @@ const Index = () => {
 
 export default Index;
 
+// Define styles object
 const styles = StyleSheet.create({
   container1: {
     flex: 1,
-    backgroundColor: '#f7faff',
+    paddingTop: 40,
+    paddingHorizontal: 18,
   },
   container2: {
-    flex: 1,
-    backgroundColor: 'transparent',
-    marginTop: 50,
-    marginLeft: 20,
-    marginRight: 20,
+    borderRadius: 18,
+    padding: 20,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+    marginBottom: 24,
   },
   brandTitle: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#222',
-    letterSpacing: 0.5,
+    letterSpacing: 1,
   },
   introBox: {
-    backgroundColor: '#f7faff',
     borderRadius: 12,
-    padding: 14,
-    marginBottom: 18,
-    marginTop: -10,
-    marginLeft: 0,
-    marginRight: 0,
-    shadowColor: '#668cff', // blue glow
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 8,
-    borderWidth: 2,
-    borderColor: '#b3e5fc', // light blue border
+    padding: 16,
+    marginBottom: 24,
   },
   introText: {
-    fontSize: 15,
-    color: '#555',
-    textAlign: 'left',
+    fontSize: 16,
+    lineHeight: 22,
   },
-  grid: {
-    flexDirection: 'column',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
+  unreadBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
     alignItems: 'center',
-  },
-  row: {
-    flexDirection: 'row',
     justifyContent: 'center',
-    width: '100%',
+    zIndex: 2,
+    paddingHorizontal: 3,
+    borderWidth: 1,
+  },
+  unreadText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 12,
+    textAlign: 'center',
   },
 });
+

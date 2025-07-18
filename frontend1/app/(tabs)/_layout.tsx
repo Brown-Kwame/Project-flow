@@ -28,7 +28,7 @@ const TasksTabBarIcon = ({ color }: { color: string }) => (
 );
 
 const InboxTabBarIcon = ({ color }: { color: string }) => (
-  <FontAwesome size={24} name="bell" color={color} />
+  <FontAwesome size={24} name="envelope" color={color} />
 );
 
 export default function TabLayout() {

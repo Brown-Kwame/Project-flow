@@ -26,7 +26,10 @@
         "jridgewell",
         "jsesc",
         "jsonplaceholder",
-        "picocolors"
+        "Mainindex",
+        "nativewind",
+        "picocolors",
+        "Pressable"
     ],
     "git.ignoreLimitWarning": true
 }

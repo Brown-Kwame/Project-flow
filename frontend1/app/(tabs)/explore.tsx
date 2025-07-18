@@ -1,14 +1,14 @@
-
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import React, { useState, useContext } from 'react';
 import { useColorScheme as useSystemColorScheme, ScrollView, Text, TouchableOpacity, View, Modal, TextInput, FlatList, Alert, Platform, ToastAndroid } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import * as Calendar from 'expo-calendar';
-import * as Notifications from 'expo-notifications';
+
 import * as Contacts from 'expo-contacts';
 import * as Clipboard from 'expo-clipboard';
 import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 import { ThemeContext } from './_layout';
@@ -26,8 +26,44 @@ const Explore = () => {
   // Language modal state
   // DND modal state
   const [dndModalVisible, setDndModalVisible] = useState(false);
-  // Push notification modal state
   const [pushModalVisible, setPushModalVisible] = useState(false);
+  // Push notification modal state
+  // Unread counts for notification sections
+  const [unreadDirect, setUnreadDirect] = useState(0);
+  const [unreadMentions, setUnreadMentions] = useState(0);
+  const [unreadAll, setUnreadAll] = useState(0);
+  // Account details modal state
+  const [accountModalVisible, setAccountModalVisible] = useState(false);
+
+  // Sample user details (replace with real data)
+  const userDetails = {
+    name: 'Screw Yt18',
+    email: 'screw.yt18@gmail.com',
+    joined: '2025-06-01',
+  };
+
+  // Fetch unread counts from AsyncStorage (simulate)
+  React.useEffect(() => {
+    const fetchUnread = async () => {
+      try {
+        const inbox = await AsyncStorage.getItem('asana_inbox');
+        if (inbox) {
+          const messages = JSON.parse(inbox);
+          setUnreadDirect(messages.filter((m: any) => m.user !== 'You').length);
+        } else {
+          setUnreadDirect(3);
+        }
+        // Simulate mentions & all activity
+        setUnreadMentions(2);
+        setUnreadAll(5);
+      } catch {
+        setUnreadDirect(3);
+        setUnreadMentions(2);
+        setUnreadAll(5);
+      }
+    };
+    fetchUnread();
+  }, []);
   // Licenses modal state
 
   // Handler: Invite
@@ -74,36 +110,10 @@ const Explore = () => {
 
   // DND actions
   const handleDndHour = async () => {
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: 'Do Not Disturb Ended',
-        body: 'Your 1 hour DND is over.',
-      },
-      trigger: { seconds: 3600, repeats: false, type: 'timeInterval' } as any,
-    });
     setDndModalVisible(false);
     Alert.alert('DND Set', 'You will be reminded in 1 hour.');
   };
   const handleDndTomorrow = async () => {
-    const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setDate(now.getDate() + 1);
-    tomorrow.setHours(9, 0, 0, 0); // 9am next day
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: 'Do Not Disturb Ended',
-        body: 'Your DND until tomorrow is over.',
-      },
-      trigger: {
-        hour: 9,
-        minute: 0,
-        day: tomorrow.getDate(),
-        month: tomorrow.getMonth() + 1,
-        year: tomorrow.getFullYear(),
-        repeats: false,
-        type: 'calendar',
-      } as any,
-    });
     setDndModalVisible(false);
     Alert.alert('DND Set', 'You will be reminded tomorrow at 9am.');
   };
@@ -172,9 +182,11 @@ const Explore = () => {
       {/* Top right user initials icon */}
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 32, marginBottom: 8 }}>
         <Text style={{ color: cardText, fontWeight: 'bold', fontSize: 30, letterSpacing: 0.2 }}>Account</Text>
-        <View style={{ backgroundColor: themeColors.tint, borderRadius: 16, width: 36, height: 36, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: themeColors.background, shadowColor: themeColors.tint, shadowOpacity: 0.3, shadowRadius: 6, elevation: 4 }}>
-          <Text style={{ color: themeColors.background, fontWeight: 'bold', fontSize: 16 }}>SY</Text>
-        </View>
+        <TouchableOpacity onPress={() => setAccountModalVisible(true)}>
+          <View style={{ backgroundColor: themeColors.tint, borderRadius: 16, width: 36, height: 36, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: themeColors.background, shadowColor: themeColors.tint, shadowOpacity: 0.3, shadowRadius: 6, elevation: 4 }}>
+            <Text style={{ color: themeColors.background, fontWeight: 'bold', fontSize: 16 }}>SY</Text>
+          </View>
+        </TouchableOpacity>
       </View>
       {/* All cards scrollable, organizations title starts at top */}
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 0, paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
@@ -275,40 +287,42 @@ const Explore = () => {
       <Modal visible={inviteModalVisible} animationType="slide" transparent onRequestClose={() => setInviteModalVisible(false)}>
         <View style={{ flex: 1, backgroundColor: '#000a', justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: '#23252b', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, minHeight: 320 }}>
-            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>Invite to My workspace</Text>
-            <TextInput
-              placeholder="Enter email or contact"
-              placeholderTextColor="#b0b3b8"
-              value={inviteInput}
-              onChangeText={setInviteInput}
-              style={{ backgroundColor: '#181a20', color: '#fff', borderRadius: 8, padding: 12, marginBottom: 12, fontSize: 16 }}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-            <TouchableOpacity
-              style={{ backgroundColor: '#3a3b3c', borderRadius: 16, paddingVertical: 10, alignItems: 'center', marginBottom: 12 }}
-              onPress={handlePickContact}
-            >
-              <Text style={{ color: '#fff', fontWeight: '600', fontSize: 15 }}>Pick from Contacts</Text>
-            </TouchableOpacity>
-            <FlatList
-              data={invitees}
-              keyExtractor={(item, idx) => item + idx}
-              renderItem={({ item }) => (
-                <Text style={{ color: '#b0b3b8', fontSize: 15, marginBottom: 4 }}>{item}</Text>
-              )}
-              ListEmptyComponent={<Text style={{ color: '#b0b3b8', fontSize: 15, marginBottom: 4 }}>No invitees yet.</Text>}
-              style={{ maxHeight: 80, marginBottom: 16 }}
-            />
-            <TouchableOpacity
-              style={{ backgroundColor: '#668cff', borderRadius: 24, paddingVertical: 12, alignItems: 'center', marginTop: 8 }}
-              onPress={handleSendInvite}
-            >
-              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 17 }}>Send Invite</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setInviteModalVisible(false)} style={{ alignItems: 'center', marginTop: 16 }}>
-              <Text style={{ color: '#b0b3b8', fontSize: 15 }}>Cancel</Text>
-            </TouchableOpacity>
+            <View>
+              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>Invite to My workspace</Text>
+              <TextInput
+                placeholder="Enter email or contact"
+                placeholderTextColor="#b0b3b8"
+                value={inviteInput}
+                onChangeText={setInviteInput}
+                style={{ backgroundColor: '#181a20', color: '#fff', borderRadius: 8, padding: 12, marginBottom: 12, fontSize: 16 }}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+              <TouchableOpacity
+                style={{ backgroundColor: '#3a3b3c', borderRadius: 16, paddingVertical: 10, alignItems: 'center', marginBottom: 12 }}
+                onPress={handlePickContact}
+              >
+                <Text style={{ color: '#fff', fontWeight: '600', fontSize: 15 }}>Pick from Contacts</Text>
+              </TouchableOpacity>
+              <FlatList
+                data={invitees}
+                keyExtractor={(item, idx) => item + idx}
+                renderItem={({ item }) => (
+                  <View><Text style={{ color: '#b0b3b8', fontSize: 15, marginBottom: 4 }}>{item || ''}</Text></View>
+                )}
+                ListEmptyComponent={<View><Text style={{ color: '#b0b3b8', fontSize: 15, marginBottom: 4 }}>No invitees yet.</Text></View>}
+                style={{ maxHeight: 80, marginBottom: 16 }}
+              />
+              <TouchableOpacity
+                style={{ backgroundColor: '#668cff', borderRadius: 24, paddingVertical: 12, alignItems: 'center', marginTop: 8 }}
+                onPress={handleSendInvite}
+              >
+                <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 17 }}>Send Invite</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setInviteModalVisible(false)} style={{ alignItems: 'center', marginTop: 16 }}>
+                <Text style={{ color: '#b0b3b8', fontSize: 15 }}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -316,20 +330,22 @@ const Explore = () => {
       <Modal visible={dndModalVisible} animationType="slide" transparent onRequestClose={() => setDndModalVisible(false)}>
         <View style={{ flex: 1, backgroundColor: '#000a', justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: '#23252b', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, minHeight: 220 }}>
-            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>Do Not Disturb</Text>
-            <Text style={{ color: '#b0b3b8', fontSize: 15, marginBottom: 8 }}>Pause notifications for:</Text>
-            <TouchableOpacity onPress={handleDndHour} style={{ backgroundColor: '#181a20', borderRadius: 8, padding: 12, marginBottom: 8 }}>
-              <Text style={{ color: '#fff', fontSize: 16 }}>1 hour</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleDndTomorrow} style={{ backgroundColor: '#181a20', borderRadius: 8, padding: 12, marginBottom: 8 }}>
-              <Text style={{ color: '#fff', fontSize: 16 }}>Until tomorrow</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleDndCalendar} style={{ backgroundColor: '#181a20', borderRadius: 8, padding: 12, marginBottom: 8 }}>
-              <Text style={{ color: '#fff', fontSize: 16 }}>Pick date from calendar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setDndModalVisible(false)} style={{ alignItems: 'center', marginTop: 16 }}>
-              <Text style={{ color: '#b0b3b8', fontSize: 15 }}>Cancel</Text>
-            </TouchableOpacity>
+            <View>
+              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>Do Not Disturb</Text>
+              <Text style={{ color: '#b0b3b8', fontSize: 15, marginBottom: 8 }}>Pause notifications for:</Text>
+              <TouchableOpacity onPress={handleDndHour} style={{ backgroundColor: '#181a20', borderRadius: 8, padding: 12, marginBottom: 8 }}>
+                <Text style={{ color: '#fff', fontSize: 16 }}>1 hour</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleDndTomorrow} style={{ backgroundColor: '#181a20', borderRadius: 8, padding: 12, marginBottom: 8 }}>
+                <Text style={{ color: '#fff', fontSize: 16 }}>Until tomorrow</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleDndCalendar} style={{ backgroundColor: '#181a20', borderRadius: 8, padding: 12, marginBottom: 8 }}>
+                <Text style={{ color: '#fff', fontSize: 16 }}>Pick date from calendar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setDndModalVisible(false)} style={{ alignItems: 'center', marginTop: 16 }}>
+                <Text style={{ color: '#b0b3b8', fontSize: 15 }}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -338,14 +354,29 @@ const Explore = () => {
         <View style={{ flex: 1, backgroundColor: '#000a', justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: '#23252b', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, minHeight: 220 }}>
             <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>Push Notifications</Text>
-            <TouchableOpacity style={{ backgroundColor: '#181a20', borderRadius: 8, padding: 12, marginBottom: 8 }}>
-              <Text style={{ color: '#fff', fontSize: 16 }}>Mentions & Activity</Text>
+            <TouchableOpacity style={{ backgroundColor: '#181a20', borderRadius: 8, padding: 12, marginBottom: 8, flexDirection: 'row', alignItems: 'center' }} onPress={() => { setPushModalVisible(false); router.push('/inbox/Inbox?section=mentions'); }}>
+              <Text style={{ color: '#fff', fontSize: 16, flex: 1 }}>Mentions & Activity</Text>
+              {unreadMentions > 0 && (
+                <View style={{ backgroundColor: '#ff4d4d', borderRadius: 8, minWidth: 18, height: 18, alignItems: 'center', justifyContent: 'center', marginLeft: 8, paddingHorizontal: 3 }}>
+                  <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 12 }}>{unreadMentions}</Text>
+                </View>
+              )}
             </TouchableOpacity>
-            <TouchableOpacity style={{ backgroundColor: '#181a20', borderRadius: 8, padding: 12, marginBottom: 8 }}>
-              <Text style={{ color: '#fff', fontSize: 16 }}>Direct messages</Text>
+            <TouchableOpacity style={{ backgroundColor: '#181a20', borderRadius: 8, padding: 12, marginBottom: 8, flexDirection: 'row', alignItems: 'center' }} onPress={() => { setPushModalVisible(false); router.push('/inbox/Inbox?section=direct-messages'); }}>
+              <Text style={{ color: '#fff', fontSize: 16, flex: 1 }}>Direct messages</Text>
+              {unreadDirect > 0 && (
+                <View style={{ backgroundColor: '#ff4d4d', borderRadius: 8, minWidth: 18, height: 18, alignItems: 'center', justifyContent: 'center', marginLeft: 8, paddingHorizontal: 3 }}>
+                  <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 12 }}>{unreadDirect}</Text>
+                </View>
+              )}
             </TouchableOpacity>
-            <TouchableOpacity style={{ backgroundColor: '#181a20', borderRadius: 8, padding: 12, marginBottom: 8 }}>
-              <Text style={{ color: '#fff', fontSize: 16 }}>All activity</Text>
+            <TouchableOpacity style={{ backgroundColor: '#181a20', borderRadius: 8, padding: 12, marginBottom: 8, flexDirection: 'row', alignItems: 'center' }} onPress={() => { setPushModalVisible(false); router.push('/inbox/Inbox?section=all-activity'); }}>
+              <Text style={{ color: '#fff', fontSize: 16, flex: 1 }}>All activity</Text>
+              {unreadAll > 0 && (
+                <View style={{ backgroundColor: '#ff4d4d', borderRadius: 8, minWidth: 18, height: 18, alignItems: 'center', justifyContent: 'center', marginLeft: 8, paddingHorizontal: 3 }}>
+                  <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 12 }}>{unreadAll}</Text>
+                </View>
+              )}
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setPushModalVisible(false)} style={{ alignItems: 'center', marginTop: 16 }}>
               <Text style={{ color: '#b0b3b8', fontSize: 15 }}>Cancel</Text>
@@ -357,7 +388,9 @@ const Explore = () => {
       <Modal visible={themeModalVisible} animationType="slide" transparent onRequestClose={() => setThemeModalVisible(false)}>
         <View style={{ flex: 1, backgroundColor: '#000a', justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: '#23252b', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, minHeight: 220 }}>
-            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>Select Theme</Text>
+            <View>
+              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>Select Theme</Text>
+            </View>
             <TouchableOpacity onPress={() => handleThemeSelect('light')} style={{ backgroundColor: '#181a20', borderRadius: 8, padding: 12, marginBottom: 8 }}>
               <Text style={{ color: '#fff', fontSize: 16 }}>Light</Text>
             </TouchableOpacity>
@@ -369,6 +402,20 @@ const Explore = () => {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setThemeModalVisible(false)} style={{ alignItems: 'center', marginTop: 16 }}>
               <Text style={{ color: '#b0b3b8', fontSize: 15 }}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      {/* Account Details Modal */}
+      <Modal visible={accountModalVisible} animationType="slide" transparent onRequestClose={() => setAccountModalVisible(false)}>
+        <View style={{ flex: 1, backgroundColor: '#000a', justifyContent: 'center', alignItems: 'center' }}>
+          <View style={{ backgroundColor: '#fff', borderRadius: 20, padding: 24, minWidth: 320, alignItems: 'center' }}>
+            <Text style={{ fontWeight: 'bold', fontSize: 22, marginBottom: 12, color: '#222' }}>Account Details</Text>
+            <Text style={{ fontSize: 16, marginBottom: 8 }}>Name: {userDetails.name}</Text>
+            <Text style={{ fontSize: 16, marginBottom: 8 }}>Email: {userDetails.email}</Text>
+            <Text style={{ fontSize: 16, marginBottom: 8 }}>Joined: {userDetails.joined}</Text>
+            <TouchableOpacity onPress={() => setAccountModalVisible(false)} style={{ marginTop: 16 }}>
+              <Text style={{ color: '#668cff', fontWeight: 'bold', fontSize: 16 }}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>

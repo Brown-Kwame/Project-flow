@@ -1,7 +1,9 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, Modal, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useMemo, useState, useContext } from 'react';
+import { ActivityIndicator, FlatList, Modal, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View, useColorScheme } from 'react-native';
+import { ThemeContext } from '../(tabs)/_layout';
+import { Colors } from '@/constants/Colors';
 
 // Demo tasks data (replace with API integration as needed)
 const demoTasks = [
@@ -27,6 +29,13 @@ const Tasks = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [taskForm, setTaskForm] = useState({ title: '', status: 'To Do', assignee: '', due: '' });
+
+  const { theme } = useContext(ThemeContext);
+  const systemColorScheme = useColorScheme();
+  let colorMode: 'light' | 'dark' = 'light';
+  if (theme === 'dark') colorMode = 'dark';
+  else if (theme === 'system') colorMode = systemColorScheme === 'dark' ? 'dark' : 'light';
+  const themeColors = Colors[colorMode];
 
   const filteredTasks = useMemo(() => {
     if (!search) return tasks;
@@ -80,7 +89,7 @@ const Tasks = () => {
         } else {
           setTasks(demoTasks);
         }
-      } catch (e) {
+      } catch {
         setTasks(demoTasks);
       } finally {
         setLoading(false);
@@ -94,45 +103,46 @@ const Tasks = () => {
   }, [tasks]);
 
   return (
-    <View style={taskStyles.container}>
-      <View style={taskStyles.header}>
-        <Text style={taskStyles.heading}>My Tasks</Text>
-        <TouchableOpacity style={taskStyles.fab} onPress={() => { setEditId(null); setTaskForm({ title: '', status: 'To Do', assignee: '', due: '' }); setModalVisible(true); }}>
-          <FontAwesome name="plus" color="white" size={24} />
+    <View style={[taskStyles.container, { backgroundColor: themeColors.background }]}> {/* Theme-aware container */}
+      <View style={[taskStyles.header, { backgroundColor: themeColors.background, borderBottomColor: themeColors.icon }]}> {/* Theme-aware header */}
+        <Text style={[taskStyles.heading, { color: themeColors.text }]}>My Tasks</Text>
+        <TouchableOpacity style={[taskStyles.fab, { backgroundColor: themeColors.tint, borderColor: themeColors.tint }]} onPress={() => { setEditId(null); setTaskForm({ title: '', status: 'To Do', assignee: '', due: '' }); setModalVisible(true); }}>
+          <FontAwesome name="plus" color={themeColors.background} size={24} />
         </TouchableOpacity>
       </View>
       <TextInput
-        style={taskStyles.search}
+        style={[taskStyles.search, { backgroundColor: themeColors.background, color: themeColors.text, borderColor: themeColors.icon }]}
         placeholder="Search tasks..."
         value={search}
         onChangeText={setSearch}
+        placeholderTextColor={themeColors.icon}
       />
-      {loading && <ActivityIndicator size="large" color="#668cff" style={{ marginTop: 20 }} />}
+      {loading && <ActivityIndicator size="large" color={themeColors.tint} style={{ marginTop: 20 }} />}
       <FlatList
         data={filteredTasks}
         keyExtractor={item => item.id}
         contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: 8 }}
         renderItem={({ item }) => (
-          <View style={taskStyles.card}>
+          <View style={[taskStyles.card, { backgroundColor: themeColors.background, borderColor: themeColors.tint }]}> {/* Theme-aware card */}
             <View style={taskStyles.cardHeader}>
-              <Text style={taskStyles.taskTitle}>{item.title}</Text>
-              <View style={[taskStyles.statusBadge, { backgroundColor: statusColors[item.status as keyof typeof statusColors] || '#ccc' }]}> 
+              <Text style={[taskStyles.taskTitle, { color: themeColors.text }]}>{item.title}</Text>
+              <View style={[taskStyles.statusBadge, { backgroundColor: statusColors[item.status as keyof typeof statusColors] || themeColors.icon }]}> 
                 <Text style={taskStyles.statusText}>{item.status}</Text>
               </View>
               <View style={{ flexDirection: 'row', marginLeft: 8 }}>
                 <TouchableOpacity onPress={() => handleEditTask(item)}>
-                  <FontAwesome name="edit" size={18} color="#668cff" style={{ marginRight: 10 }} />
+                  <FontAwesome name="edit" size={18} color={themeColors.tint} style={{ marginRight: 10 }} />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => handleDeleteTask(item.id)}>
                   <FontAwesome name="trash" size={18} color="#ff4d4d" />
                 </TouchableOpacity>
               </View>
             </View>
-            <Text style={taskStyles.taskMeta}>Assignee: <Text style={taskStyles.metaValue}>{item.assignee}</Text></Text>
-            <Text style={taskStyles.taskMeta}>Due: <Text style={taskStyles.metaValue}>{item.due}</Text></Text>
+            <Text style={[taskStyles.taskMeta, { color: themeColors.icon }]}>Assignee: <Text style={taskStyles.metaValue}>{item.assignee}</Text></Text>
+            <Text style={[taskStyles.taskMeta, { color: themeColors.icon }]}>Due: <Text style={taskStyles.metaValue}>{item.due}</Text></Text>
           </View>
         )}
-        ListEmptyComponent={<Text style={{ textAlign: 'center', color: '#888', marginTop: 40 }}>No tasks found.</Text>}
+        ListEmptyComponent={<Text style={{ textAlign: 'center', color: themeColors.icon, marginTop: 40 }}>No tasks found.</Text>}
       />
       {/* Add/Edit Task Modal */}
       <Modal
@@ -142,43 +152,47 @@ const Tasks = () => {
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={taskStyles.modalOverlay}>
-          <View style={taskStyles.modalContent}>
-            <Text style={taskStyles.modalTitle}>{editId ? 'Edit Task' : 'Add New Task'}</Text>
+          <View style={[taskStyles.modalContent, { backgroundColor: themeColors.background }]}> {/* Theme-aware modal */}
+            <Text style={[taskStyles.modalTitle, { color: themeColors.text }]}>{editId ? 'Edit Task' : 'Add New Task'}</Text>
             <TextInput
-              style={taskStyles.input}
+              style={[taskStyles.input, { backgroundColor: themeColors.background, color: themeColors.text, borderColor: themeColors.icon }]}
               placeholder="Task Title"
               value={taskForm.title}
               onChangeText={text => setTaskForm({ ...taskForm, title: text })}
+              placeholderTextColor={themeColors.icon}
             />
             <TextInput
-              style={taskStyles.input}
+              style={[taskStyles.input, { backgroundColor: themeColors.background, color: themeColors.text, borderColor: themeColors.icon }]}
               placeholder="Status (To Do, In Progress, Done, In Review)"
               value={taskForm.status}
               onChangeText={text => setTaskForm({ ...taskForm, status: text })}
+              placeholderTextColor={themeColors.icon}
             />
             <TextInput
-              style={taskStyles.input}
+              style={[taskStyles.input, { backgroundColor: themeColors.background, color: themeColors.text, borderColor: themeColors.icon }]}
               placeholder="Assignee"
               value={taskForm.assignee}
               onChangeText={text => setTaskForm({ ...taskForm, assignee: text })}
+              placeholderTextColor={themeColors.icon}
             />
             <TextInput
-              style={taskStyles.input}
+              style={[taskStyles.input, { backgroundColor: themeColors.background, color: themeColors.text, borderColor: themeColors.icon }]}
               placeholder="Due Date (YYYY-MM-DD)"
               value={taskForm.due}
               onChangeText={text => setTaskForm({ ...taskForm, due: text })}
+              placeholderTextColor={themeColors.icon}
             />
             <View style={taskStyles.modalActions}>
               <Pressable style={taskStyles.cancelBtn} onPress={() => { setModalVisible(false); setEditId(null); }}>
-                <Text style={{ color: '#668cff', fontWeight: 'bold' }}>Cancel</Text>
+                <Text style={{ color: themeColors.tint, fontWeight: 'bold' }}>Cancel</Text>
               </Pressable>
               {editId ? (
-                <Pressable style={taskStyles.addBtn} onPress={handleUpdateTask} disabled={!taskForm.title}>
-                  <Text style={{ color: 'white', fontWeight: 'bold' }}>Save</Text>
+                <Pressable style={[taskStyles.addBtn, { backgroundColor: themeColors.tint, borderColor: themeColors.tint }]} onPress={handleUpdateTask} disabled={!taskForm.title}>
+                  <Text style={{ color: themeColors.background, fontWeight: 'bold' }}>Save</Text>
                 </Pressable>
               ) : (
-                <Pressable style={taskStyles.addBtn} onPress={handleAddTask} disabled={!taskForm.title}>
-                  <Text style={{ color: 'white', fontWeight: 'bold' }}>Add</Text>
+                <Pressable style={[taskStyles.addBtn, { backgroundColor: themeColors.tint, borderColor: themeColors.tint }]} onPress={handleAddTask} disabled={!taskForm.title}>
+                  <Text style={{ color: themeColors.background, fontWeight: 'bold' }}>Add</Text>
                 </Pressable>
               )}
             </View>

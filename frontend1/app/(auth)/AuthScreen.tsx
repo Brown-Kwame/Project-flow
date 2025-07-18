@@ -12,8 +12,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   ImageBackground,
+  NativeSyntheticEvent,
+  NativeScrollEvent
 } from 'react-native';
-import { NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { router } from 'expo-router';
 import { useUser } from '../context/UserContext';
 
@@ -41,7 +42,10 @@ const AuthScreen = () => {
     let text = '';
     if (currentPage === 0) text = aiText;
     else if (currentPage === 1) text = leaderboardText;
-    else return setAnimatedText('');
+    else {
+      setAnimatedText('');
+      return;
+    }
 
     let index = 0;
     setAnimatedText('');

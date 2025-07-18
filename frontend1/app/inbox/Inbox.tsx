@@ -1,7 +1,25 @@
+// import { useLocalSearchParams } from 'expo-router';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  useColorScheme
+} from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { ThemeContext } from '../(tabs)/_layout';
+import { Colors } from '@/constants/Colors';
+
 const demoMessages = [
   { id: '1', user: 'James', text: 'Welcome to the team chat!', timestamp: '2025-06-12T09:00:00Z' },
   { id: '2', user: 'Sarah', text: 'Let’s discuss the new feature.', timestamp: '2025-06-12T09:05:00Z' },
@@ -10,15 +28,42 @@ const demoMessages = [
 
 const INBOX_STORAGE_KEY = 'asana_inbox';
 
-const Inbox = () => {
-  const [unreadCount, setUnreadCount] = useState(0);
+function Inbox() {
+  // Section param from router
+  const params = useLocalSearchParams();
+  const router = useRouter();
+  const section = params?.section || 'direct-messages';
+  const sender = params?.sender || null;
+
   const [messages, setMessages] = useState(demoMessages);
+  // Direct messages logic
+  let filteredMessages = messages;
+  if (section === 'mentions') {
+    filteredMessages = messages.filter((m) => m.text.toLowerCase().includes('feature') || m.text.toLowerCase().includes('docs'));
+  } else if (section === 'all-activity') {
+    filteredMessages = messages;
+  } else if (section === 'direct-messages' && sender) {
+    filteredMessages = messages.filter((m) => m.user === sender || m.user === 'You');
+  } else if (section === 'direct-messages') {
+    // Show list of senders to start a chat
+    filteredMessages = [];
+  }
+
   const [loading, setLoading] = useState(false);
   const [input, setInput] = useState('');
   const [editId, setEditId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const flatListRef = useRef<FlatList>(null);
+  const { theme } = React.useContext(ThemeContext);
+
+  // Theme context: support system theme
+  const systemColorScheme = useColorScheme();
+  let colorMode: 'light' | 'dark' = 'light';
+  if (theme === 'dark') colorMode = 'dark';
+  else if (theme === 'system') colorMode = systemColorScheme === 'dark' ? 'dark' : 'light';
+  const themeColors = Colors[colorMode];
+
   useEffect(() => {
     const loadMessages = async () => {
       setLoading(true);
@@ -29,7 +74,7 @@ const Inbox = () => {
         } else {
           setMessages(demoMessages);
         }
-      } catch (e) {
+      } catch {
         setMessages(demoMessages);
       } finally {
         setLoading(false);
@@ -110,20 +155,46 @@ const Inbox = () => {
   );
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <Text style={styles.heading}>Team Chat & Comments</Text>
-      {loading && <ActivityIndicator size="large" color="#668cff" style={{ marginTop: 20 }} />}
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        keyExtractor={item => item.id}
-        renderItem={renderMessage}
-        contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
-        ListEmptyComponent={<Text style={{ textAlign: 'center', color: '#888', marginTop: 40 }}>No messages yet.</Text>}
-      />
-      <View style={styles.inputBar}>
+    <KeyboardAvoidingView
+      style={[styles.container, { backgroundColor: themeColors.background }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+    >
+      <Text style={[styles.heading, { color: themeColors.text }]}>
+        {section === 'mentions' ? 'Mentions & Activity' : section === 'all-activity' ? 'All Activity' : sender ? `Chat with ${sender}` : 'Direct Messages'}
+      </Text>
+      {loading && <ActivityIndicator size="large" color={themeColors.tint} style={{ marginTop: 20 }} />}
+      {section === 'direct-messages' && !sender ? (
+        <View style={{ padding: 24 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 12, color: themeColors.text }}>Select a sender to start a chat:</Text>
+          {Array.from(new Set(messages.filter(m => m.user !== 'You').map(m => m.user))).map((name) => (
+            <TouchableOpacity
+              key={name}
+              style={[styles.messageCard, { backgroundColor: themeColors.background, borderColor: themeColors.tint }]}
+              onPress={() => {
+                router.push(`/Inbox?section=direct-messages&sender=${encodeURIComponent(name)}`);
+              }}
+            >
+              <Text style={{ fontSize: 16, color: themeColors.tint, fontWeight: 'bold' }}>{name}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      ) : (
+        <FlatList
+          ref={flatListRef}
+          data={filteredMessages}
+          keyExtractor={item => item.id}
+          renderItem={renderMessage}
+          contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
+          ListEmptyComponent={<Text style={{ textAlign: 'center', color: themeColors.icon, marginTop: 40 }}>No messages yet.</Text>}
+        />
+      )}
+      <View style={[
+        styles.inputBar,
+        { backgroundColor: themeColors.background, borderTopColor: themeColors.icon, paddingBottom: Platform.OS === 'ios' ? 24 : 8 }
+      ]}> {/* Use icon for border color */}
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: themeColors.background, color: themeColors.text }]}
           placeholder="Type a message..."
           value={input}
           onChangeText={setInput}
@@ -133,12 +204,12 @@ const Inbox = () => {
           accessibilityHint="Type your message here"
         />
         <TouchableOpacity
-          style={styles.sendBtn}
+          style={[styles.sendBtn, { backgroundColor: themeColors.tint, borderColor: themeColors.tint }]}
           onPress={handleSend}
           accessibilityLabel="Send message"
           accessibilityHint="Sends your message to the chat"
         >
-          <FontAwesome name="send" size={20} color="white" />
+          <FontAwesome name="send" size={20} color={themeColors.background} />
         </TouchableOpacity>
       </View>
       {/* Edit Message Modal */}
@@ -296,9 +367,6 @@ const styles = StyleSheet.create({
     borderColor: '#668cff',
   },
   modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.2)',
-    justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
