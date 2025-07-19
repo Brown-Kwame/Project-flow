@@ -3,16 +3,14 @@ import {
   View,
   Text,
   StyleSheet,
-  Image,
   TouchableOpacity,
   ScrollView,
-  Switch,
-  Dimensions
+  Switch
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 
-const { width } = Dimensions.get('window');
+
+
 
 type PlanKey = 'standard' | 'advanced';
 
@@ -31,7 +29,7 @@ export default function PricingScreen() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<PlanKey>('standard');
 
-  const handleSubscribe = () => router.push('/(auth)/pricing');
+
 
   const plans: Record<PlanKey, PlanDetails> = {
     standard: {
@@ -156,6 +154,23 @@ export default function PricingScreen() {
         <Text style={styles.faqText}>Have Questions?</Text>
         <TouchableOpacity style={styles.chatButton} onPress={() => router.push('/(auth)/contact')}>
           <Text style={styles.chatButtonText}>Chat With Us</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Continue Button at the bottom */}
+      <View style={{ marginTop: 30, alignItems: 'center' }}>
+        <TouchableOpacity
+          style={{
+            backgroundColor: '#4E8AFE',
+            paddingVertical: 14,
+            paddingHorizontal: 40,
+            borderRadius: 8,
+            alignItems: 'center',
+            marginBottom: 30,
+          }}
+          onPress={() => router.push('/(tabs)')}
+        >
+          <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18 }}>Continue</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
