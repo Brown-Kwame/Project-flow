@@ -2,13 +2,33 @@
 # Path: your-api-gateway-project/src/main/resources/application.yml
 
 server:
-  port: 8080 # The default port for the API Gateway. All client requests will hit this.
+  port: 8094 # The default port for the API Gateway. All client requests will hit this.
 
 spring:
   application:
     name: api-gateway # The name of this service, used by Eureka
   cloud:
     gateway:
+      webflux: # Spring Cloud Gateway uses Spring WebFlux
+        cors:
+          filter:
+            cors-configurations:
+              '[/**]': # Apply CORS to all paths
+                allowed-origins:
+                  - "http://localhost:19000" # Add your React Native development URL (e.g., Expo)
+                  - "http://localhost:8081"  # Add your React Native web build URL if applicable
+                  - "http://localhost:3000"  # Common for React web app
+                allowed-methods:
+                  - "GET"
+                  - "POST"
+                  - "PUT"
+                  - "DELETE"
+                  - "OPTIONS"
+                allowed-headers:
+                  - "*" # Allow all headers, including Authorization for JWT
+                allow-credentials: true # Allow sending cookies and HTTP authentication headers
+                max-age: 3600 # How long the pre-flight request can be cached (in seconds)
+
       routes:
         # Route for User Service
         - id: user-service
@@ -64,6 +84,17 @@ spring:
             - Path=/portfolios/** # All requests starting with /portfolios will go to Portfolio Service
           filters:
             - RewritePath=/portfolios/(?<segment>.*), /portfolios/${segment}
+
+        - id: chat-service
+          uri: lb://CHAT-SERVICE # 'lb://' indicates load balancing via Eureka
+          predicates:
+            - Path=/api/chat/** # REST endpoints for chat (e.g., /api/chat/send, /api/chat/history)
+            - WebSocket # IMPORTANT: This predicate handles WebSocket upgrade requests
+          filters:
+            - RewritePath=/api/chat/(?<segment>.*), /${segment} # Remove /api/chat from path
+
+
+
 
 eureka:
   client:

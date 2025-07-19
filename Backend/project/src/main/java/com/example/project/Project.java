@@ -47,6 +47,9 @@ public class Project {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt; // Timestamp when the project was last updated
 
+    @Column(name = "portfolio_id", nullable = false)
+    private Long portfolioId;
+
     @PrePersist // Called before a new entity is persisted
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();

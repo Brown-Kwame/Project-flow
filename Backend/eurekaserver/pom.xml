@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.3</version> <!-- Use same Spring Boot version as other services -->
+        <version>3.5.3</version> <!-- Ensure this matches your current Spring Boot version -->
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
@@ -14,14 +14,31 @@
     <name>eureka-server</name>
     <description>Eureka Server for Asana Clone Microservices</description>
     <properties>
-        <java.version>24</java.version>
-        <spring-cloud.version>2025.0.0</spring-cloud.version> <!-- Must match Spring Cloud version in API Gateway -->
+        <java.version>24</java.version> <!-- Or whatever Java version you are using for your project -->
+        <spring-cloud.version>2025.0.0</spring-cloud.version> <!-- Ensure this matches your working Spring Cloud version -->
+        <lombok.version>1.18.30</lombok.version>
     </properties>
     <dependencies>
+        <!-- Spring Boot Starter Web (for basic web capabilities) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!-- Spring Cloud Netflix Eureka Server -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
         </dependency>
+
+        <!-- Lombok (for boilerplate code reduction) -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Spring Boot Starter Test (for testing) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -42,6 +59,7 @@
 
     <build>
         <plugins>
+            <!-- Spring Boot Maven Plugin for packaging executable JARs -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -52,6 +70,18 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                </configuration>
+            </plugin>
+            <!-- Maven Compiler Plugin (if you had custom source/target versions or toolchains) -->
+            <!-- If you had a maven-compiler-plugin block here before, ensure it's restored or removed if not needed -->
+            <!-- Example of a basic compiler plugin (adjust version as needed) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version> <!-- Or your specific working version -->
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
         </plugins>

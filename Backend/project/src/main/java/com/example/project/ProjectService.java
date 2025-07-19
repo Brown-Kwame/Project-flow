@@ -69,4 +69,14 @@ public class ProjectService {
     public boolean projectExistsInWorkspace(String name, Long workspaceId) {
         return projectRepository.findByNameAndWorkspaceId(name, workspaceId).isPresent();
     }
+    
+    // NEW: Get all projects for a specific portfolio ID
+    public List<Project> getProjectsByPortfolioId(Long portfolioId) {
+        return projectRepository.findByPortfolioId(portfolioId);
+    }
+
+    // NEW: Get all projects for a specific portfolio ID and user ID (for ownership check)
+    public List<Project> getProjectsByPortfolioIdAndUserId(Long portfolioId, Long userId) {
+        return projectRepository.findByPortfolioIdAndOwnerUserId(portfolioId, userId);
+    }
 }

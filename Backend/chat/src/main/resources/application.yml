@@ -1,0 +1,31 @@
+server:
+  port: 8087 # Choose a unique port for the Chat Service (e.g., 8087)
+
+spring:
+  application:
+    name: chat-service # Eureka Service ID for this service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/chat_db # Database for chat messages
+    username: chat_user # Replace with your PostgreSQL username
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update # For development, create tables automatically
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+# Eureka Client Configuration
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/ # Address of your Eureka Server
+  instance:
+    hostname: localhost # Hostname for Eureka registration
+
+# JWT Configuration (MUST match Auth Service's JWT secret)
+jwt:
+  secret: aSecureRandomSecretKeyForJWTGenerationAndValidationThatIsLongEnoughAndComplex # Use the same secret as Auth Service
+  expiration: 3600000 # Token expiration time in milliseconds (1 hour)

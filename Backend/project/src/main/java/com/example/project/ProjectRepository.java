@@ -16,4 +16,10 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     // Find a project by name within a specific workspace (useful for uniqueness checks)
     Optional<Project> findByNameAndWorkspaceId(String name, Long workspaceId);
+
+    // NEW: Find projects by portfolioId
+    List<Project> findByPortfolioId(Long portfolioId);
+
+    // NEW: Find projects by portfolioId and userId (for ownership check)
+    List<Project> findByPortfolioIdAndOwnerUserId(Long portfolioId, Long ownerUserId);
 }

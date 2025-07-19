@@ -105,4 +105,24 @@ public class ProjectController {
         List<Project> projects = projectService.getProjectsByOwnerUserId(ownerUserId);
         return new ResponseEntity<>(projects, HttpStatus.OK);
     }
+
+        // NEW: Get all projects for a specific portfolio ID
+    @GetMapping("/portfolio/{portfolioId}")
+    public ResponseEntity<List<Project>> getProjectsByPortfolioId(@PathVariable Long portfolioId) {
+        List<Project> projects = projectService.getProjectsByPortfolioId(portfolioId);
+        if (projects.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(projects, HttpStatus.OK);
+    }
+
+    // NEW: Get all projects for a specific portfolio ID and user ID (for ownership check)
+    @GetMapping("/portfolio/{portfolioId}/user/{userId}")
+    public ResponseEntity<List<Project>> getProjectsByPortfolioIdAndUserId(@PathVariable Long portfolioId, @PathVariable Long userId) {
+        List<Project> projects = projectService.getProjectsByPortfolioIdAndUserId(portfolioId, userId);
+        if (projects.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(projects, HttpStatus.OK);
+    }
 }
