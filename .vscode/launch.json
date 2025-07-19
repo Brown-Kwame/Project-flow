@@ -2,6 +2,27 @@
     "configurations": [
         {
             "type": "java",
+            "name": "ChatApplication",
+            "request": "launch",
+            "mainClass": "com.example.chat.ChatApplication",
+            "projectName": "chat-service"
+        },
+        {
+            "type": "java",
+            "name": "UserApplication",
+            "request": "launch",
+            "mainClass": "com.example.user.UserApplication",
+            "projectName": "user"
+        },
+        {
+            "type": "java",
+            "name": "EurekaServerApplication",
+            "request": "launch",
+            "mainClass": "com.example.eurekaserver.EurekaServerApplication",
+            "projectName": "eureka-server"
+        },
+        {
+            "type": "java",
             "name": "AuthApplication",
             "request": "launch",
             "mainClass": "com.example.auth.AuthApplication",

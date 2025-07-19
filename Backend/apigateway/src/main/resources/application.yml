@@ -89,7 +89,6 @@ spring:
           uri: lb://CHAT-SERVICE # 'lb://' indicates load balancing via Eureka
           predicates:
             - Path=/api/chat/** # REST endpoints for chat (e.g., /api/chat/send, /api/chat/history)
-            - WebSocket # IMPORTANT: This predicate handles WebSocket upgrade requests
           filters:
             - RewritePath=/api/chat/(?<segment>.*), /${segment} # Remove /api/chat from path
 
