@@ -6,6 +6,7 @@ import { HapticTab } from '@/components/HapticTab';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { AntDesign } from '@expo/vector-icons';
 
 // Theme context for app-wide theme switching
 export const ThemeContext = React.createContext({ theme: 'light', setTheme: (_: string) => {} });
@@ -28,7 +29,10 @@ const TasksTabBarIcon = ({ color }: { color: string }) => (
 );
 
 const InboxTabBarIcon = ({ color }: { color: string }) => (
-  <FontAwesome size={24} name="envelope" color={color} />
+  <FontAwesome size={24} name="bell" color={color} />
+);
+const ChatTabBarIcon = ({ color }: { color: string }) => (
+  <AntDesign size={24} name="message1" color={color} />
 );
 
 export default function TabLayout() {
@@ -66,6 +70,16 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
+          name="Chat"
+          options={{
+            title: 'Chat',
+            headerShown: false,
+            tabBarIcon: ChatTabBarIcon,
+            tabBarLabelStyle: { fontWeight: '700', fontSize: 13, letterSpacing: 0.5, marginBottom: 2 },
+            tabBarItemStyle: { paddingVertical: 6, marginHorizontal: 2 },
+          }}
+        />
+        <Tabs.Screen
           name="Tasks"
           options={{
             title: 'Tasks',
@@ -78,7 +92,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="Inbox"
           options={{
-            title: 'Chat Room',
+            title: 'Inbox',
             headerShown: false,
             tabBarIcon: InboxTabBarIcon,
             tabBarLabelStyle: { fontWeight: '700', fontSize: 13, letterSpacing: 0.5, marginBottom: 2 },
