@@ -57,7 +57,7 @@ const AuthScreen = () => {
     return () => clearInterval(interval);
   }, [currentPage]);
 
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+  const handleScroll = (event: any) => {
     const page = Math.round(event.nativeEvent.contentOffset.x / width);
     setCurrentPage(page);
   };
@@ -98,7 +98,7 @@ const AuthScreen = () => {
 
     try {
       await login({ name: fullName, email, plan: 'Pro', profileImage: null });
-      router.replace('/(auth)/Billing');
+      router.replace('/(auth)/Billing' as any);
     } catch {
       setError('Signup failed. Please try again.');
     }
@@ -107,7 +107,7 @@ const AuthScreen = () => {
   };
 
   const handleLoginLink = () => {
-    router.push('/(auth)/Signin');
+    router.push('/(auth)/Signin' as any);
   };
 
   return (
@@ -139,7 +139,7 @@ const AuthScreen = () => {
             style={styles.gif}
             resizeMode="contain"
           />
-          <Text style={styles.title}>🤖 Smart AI Inside</Text>
+          <Text style={styles.title} className='text-red-400'>🤖 Smart AI Inside</Text>
           <Text style={styles.description}>{animatedText}</Text>
         </View>
 
@@ -156,7 +156,7 @@ const AuthScreen = () => {
 
         {/* Page 3: Signup Form */}
         <KeyboardAvoidingView
-          style={[styles.page, { justifyContent: 'flex-start', paddingTop: 20 }]}
+          style={[styles.page, { justifyContent: 'center', paddingTop: 20 }]}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
           <View style={styles.form}>
@@ -222,6 +222,7 @@ safeArea: {
     fontSize: 28,
     fontWeight: 'bold',
     color: '#222',
+    padding:20,
     marginBottom: 10,
     textAlign: 'center',
   },
@@ -233,9 +234,9 @@ safeArea: {
     minHeight: 100,
   },
   form: {
-    width: '90%',
+    width: '100%',
     backgroundColor: 'rgba(255,255,255,0.92)',
-    padding: '15%',
+    padding:20,
     borderRadius: 16,
     shadowColor: '#aaa',
     shadowOffset: { width: 0, height: 2 },
@@ -252,7 +253,8 @@ safeArea: {
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 8,
-    padding: 12,
+    width:'100%',
+   padding:15,
     marginTop: 4,
     backgroundColor:  'rgba(255,255,255,0.85)',
     color: '#000',
@@ -274,7 +276,15 @@ safeArea: {
     color: '#555',
     textAlign: 'center',
   },
+  loginLink: {
+    marginTop: 12,
+    alignItems: 'center',
+  },
   loginBold: {
+    color: '#007bff',
+    fontWeight: 'bold',
+  },
+  loginTextBold: {
     color: '#007bff',
     fontWeight: 'bold',
   },

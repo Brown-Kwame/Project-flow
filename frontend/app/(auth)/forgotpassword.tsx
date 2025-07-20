@@ -2,17 +2,44 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Image } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { supabase } from '../../config/supabaseClient';
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetError, setResetError] = useState('');
+
+  const handleResetPassword = async () => {
+    setResetError('');
+    setResetLoading(true);
+    if (!email) {
+      setResetError('Email is required.');
+      setResetLoading(false);
+      return;
+    }
+    try {
+      // Supabase password reset: send email
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email);
+      if (error) {
+        setResetError(error.message || 'Failed to send reset email.');
+        setResetLoading(false);
+        return;
+      }
+      // Optionally, show a message to check email
+      setResetError('Check your email for the reset link.');
+    } catch (e) {
+      setResetError('Failed to send reset email.');
+    }
+    setResetLoading(false);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       {/* Back Button */}
-      <TouchableOpacity style={styles.backButton} onPress={() => router.push('/(auth)/Signin')}>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.push('/(auth)/Signin' as any)}>
         <Ionicons name="chevron-back" size={24} color="#000" />
       </TouchableOpacity>
 
@@ -62,9 +89,10 @@ export default function ForgotPasswordScreen() {
         />
 
         {/* Button */}
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Reset Password</Text>
+        <TouchableOpacity style={styles.button} onPress={handleResetPassword} disabled={resetLoading}>
+          <Text style={styles.buttonText}>{resetLoading ? 'Sending...' : 'Reset Password'}</Text>
         </TouchableOpacity>
+        {resetError ? <Text style={styles.error}>{resetError}</Text> : null}
       </View>
     </SafeAreaView>
   );
@@ -140,5 +168,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 15,
   },
+  error: {
+    color: 'red',
+    marginTop: 10,
+    textAlign: 'center',
+  },
 });
-                                
