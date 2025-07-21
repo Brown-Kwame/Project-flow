@@ -12,7 +12,9 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useUser } from '../context/UserContext'; // Import useUser
-//import
+import { loginUser } from '../../services/authApi'; // Import loginUser from authApi
+import { supabase } from '../../lib/supabase'; // Import supabase client
+
 export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
@@ -45,16 +47,32 @@ export default function LoginScreen() {
         setLoading(false);
         return;
       }
-      // Simulate authentication (replace with real API call)
-      await login({
-        name: email.split('@')[0],
+      // Supabase login
+      const { data, error: supaError } = await supabase.auth.signInWithPassword({
         email,
+        password,
+      });
+      if (supaError) {
+        setError(supaError.message || 'Login failed. Please try again.');
+        setLoading(false);
+        return;
+      }
+      // Only update context and navigate if session is present
+      if (!data.session) {
+        setError('Login failed. Please check your credentials and try again.');
+        setLoading(false);
+        return;
+      }
+      await login({
+        name: data.user.user_metadata?.full_name || data.user.email,
+        email: data.user.email ?? '',
         plan: 'Pro',
         profileImage: null,
       });
-      // No need to manually navigate; layout will switch to main app
-    } catch (e) {
-      setError('Login failed. Please try again.');
+      // Correct navigation: go to the main tabs root, not /index
+      router.replace('/(tabs)'); // This will show the main tab screen after login
+    } catch (e: any) {
+      setError(e.message || 'Login failed. Please try again.');
     }
     setLoading(false);
   };
@@ -109,57 +127,47 @@ export default function LoginScreen() {
         <TouchableOpacity onPress={() => setRememberMe(!rememberMe)}>
           <Text style={styles.link}>{rememberMe ? '✅ ' : '⬜️ '}Remember me</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push('/(auth)/forgotpassword')}>
+        <TouchableOpacity onPress={() => router.push('/(auth)/forgotpassword' as any)}>
           <Text style={styles.link}>Forgot Password?</Text>
         </TouchableOpacity>
       </View>
 
       {/* Login */}
     <TouchableOpacity
-  style={styles.loginBtn}
-  onPress={async () => {
-    await handleLogin();
-    if (!error && email && password) {
-      router.replace('/(tabs)'); // ✅ Navigate to tabs
-
-    }
-  }}
-  disabled={loading}
->
-
-        <Text style={styles.loginBtnText}>{loading ? 'Logging in...' : 'Log in'}</Text>
-      </TouchableOpacity>
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-      {/* Manual link to index page in tabs */}
-     
-      {/* Signup */}
-      <Text style={styles.signupText}>
-        Don't have an account?{' '}
-        <Text
-          style={styles.signupLink}
-          onPress={() => router.push('/(auth)/CreateAccount')}
-        >
-          Create an account
-        </Text>
+      style={styles.loginBtn}
+      onPress={handleLogin}
+      disabled={loading}
+    >
+      <Text style={styles.loginBtnText}>{loading ? 'Logging in...' : 'Log in'}</Text>
+    </TouchableOpacity>
+    {error ? <Text style={styles.error}>{error}</Text> : null}
+    {/* Manual link to index page in tabs */}
+    {/* Signup */}
+    <Text style={styles.signupText}>
+      Don't have an account?{' '}
+      <Text
+        style={styles.signupLink}
+        onPress={() => router.push('/(auth)/signup' as any)}
+      >
+        Create an account
       </Text>
-
-      {/* Terms and Conditions */}
-      <Text style={styles.terms}>
-        By signing up, I agree to the Asana Privacy policy and{'\n'}
-        <Text style={styles.termsLink} onPress={() => setShowTerms(!showTerms)}>
-          Terms of Services {showTerms ? '▲' : '▼'}
-        </Text>
+    </Text>
+    {/* Terms and Conditions */}
+    <Text style={styles.terms}>
+      By signing up, I agree to the Asana Privacy policy and
+      <Text style={styles.termsLink} onPress={() => setShowTerms(!showTerms)}>
+        Terms of Services {showTerms ? '▲' : '▼'}
       </Text>
-
-      {showTerms && (
-        <View style={styles.termsBox}>
-          <Text style={styles.termsContent}>
-            These terms explain how we collect, use, and store your data. By using this app,
-            you agree to not misuse the platform, protect your credentials, and follow local laws.
-            Refer to our full documentation for legal details and compliance policies.
-          </Text>
-        </View>
-      )}
+    </Text>
+    {showTerms && (
+      <View style={styles.termsBox}>
+        <Text style={styles.termsContent}>
+          These terms explain how we collect, use, and store your data. By using this app,
+          you agree to not misuse the platform, protect your credentials, and follow local laws.
+          Refer to our full documentation for legal details and compliance policies.
+        </Text>
+      </View>
+    )}
     </SafeAreaView>
   );
 }
@@ -288,7 +296,7 @@ const styles = StyleSheet.create({
   link: {
     color: '#007bff',
     fontSize: 13,
-    textDecorationLine: 'underline',
+    
   },
   loginBtn: {
     backgroundColor: '#007bff',

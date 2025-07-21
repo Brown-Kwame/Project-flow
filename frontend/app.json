@@ -14,7 +14,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "orange"
       },
       "edgeToEdgeEnabled": true
     },
@@ -28,7 +28,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/Icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
@@ -37,6 +37,10 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "EXPO_PUBLIC_SUPABASE_URL": "https://iubqbncpfjopjfqoievs.supabase.co",
+      "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1YnFibmNwZmpvcGpmcW9pZXZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5OTIxMjAsImV4cCI6MjA2ODU2ODEyMH0.ZKdb3x18nz0i2HccR80sSkV8LxQeQoSzyADwAm6yrrM"
     }
   }
 }

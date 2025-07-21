@@ -17,7 +17,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import BloomCard from '../components/BloomCard';
 import { ThemeContext } from './_layout';
 import { Colors } from '@/constants/Colors';
-// ...existing code...
 
 
 
@@ -27,7 +26,8 @@ const Index = () => {
   useUser();
   const { theme } = useContext(ThemeContext);
   const systemColorScheme = useColorScheme();
-  let colorMode: 'light' | 'dark' = 'light';
+  type ColorMode = 'light' | 'dark';
+  let colorMode: ColorMode = 'light';
   if (theme === 'dark') colorMode = 'dark';
   else if (theme === 'system') colorMode = systemColorScheme === 'dark' ? 'dark' : 'light';
   const themeColors = Colors[colorMode];
@@ -41,9 +41,13 @@ const Index = () => {
       try {
         const inbox = await AsyncStorage.getItem('asana_inbox');
         if (inbox) {
-          const messages = JSON.parse(inbox);
           // Count messages not sent by 'You' as unread (demo logic)
-          const unread = messages.filter((m: any) => m.user !== 'You').length;
+          interface Message {
+            user: string;
+            [key: string]: any;
+          }
+          const messages: Message[] = JSON.parse(inbox);
+          const unread: number = messages.filter((m: Message) => m.user !== 'You').length;
           setUnreadCount(unread);
         } else {
           setUnreadCount(3); // fallback demo value
@@ -117,15 +121,7 @@ const Index = () => {
               />
               <Text style={[styles.brandTitle, { color: themeColors.text }]}>Project Flow</Text>
               <View style={{ flex: 1 }} />
-              {/* Notification bell icon for direct messages */}
-              <TouchableOpacity onPress={() => router.push('/Inbox?section=direct-messages')} style={{ position: 'relative' }}>
-                <FontAwesome name='bell' size={24} style={{ marginLeft: 12 }} color={themeColors.tint} />
-                {unreadCount > 0 && (
-                  <View style={[styles.unreadBadge, { backgroundColor: '#ff4d4d', borderColor: themeColors.background }]}> {/* Badge color stays red for visibility */}
-                    <Text style={styles.unreadText}>{unreadCount}</Text>
-                  </View>
-                )}
-              </TouchableOpacity>
+              {/* Notification bell icon and its functionality removed */}
             </View>
             <View style={[styles.introBox, { backgroundColor: colorMode === 'light' ? '#e6f0ff' : themeColors.icon }]}> {/* Theme-aware intro box */}
               <Text style={[styles.introText, { color: themeColors.text }]}>Get a quick overview of your projects, tasks, and goals. Use the cards below to dive into details, track progress, and stay organized every day.</Text>

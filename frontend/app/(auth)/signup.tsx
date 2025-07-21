@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { useUser } from '../context/UserContext';
+import { supabase } from '../../config/supabaseClient'; // Import Supabase client
 
 const Signup = () => {
   const [fullName, setFullName] = useState('');
@@ -19,60 +20,66 @@ const Signup = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useUser();
-const handleSignup = async () => {
-  setError('');
-  setLoading(true);
+  const handleSignup = async () => {
+    setError('');
+    setLoading(true);
 
-  if (!fullName || !email || !password || !confirmPassword) {
-    setError('All fields are required.');
+    if (!fullName || !email || !password || !confirmPassword) {
+      setError('All fields are required.');
+      setLoading(false);
+      return;
+    }
+
+    // ✅ Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address.');
+      setLoading(false);
+      return;
+    }
+
+    // ✅ Match passwords
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Supabase signup (best practice, config-guided)
+      const { data, error: supaError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: fullName },
+        },
+      });
+      if (supaError) {
+        setError(supaError.message || 'Signup failed. Please try again.');
+        setLoading(false);
+        return;
+      }
+      // Require email verification (no session until verified)
+      if (!data.session) {
+        setError('Check your email to verify your account before logging in.');
+        setLoading(false);
+        return;
+      }
+      // Update user context and navigate only if session exists
+      await login({
+        name: fullName,
+        email,
+        plan: 'Pro',
+        profileImage: null,
+      });
+      router.replace('/(auth)/Billing' as any);
+    } catch (e: any) {
+      setError(e.message || 'Signup failed. Please try again.');
+    }
     setLoading(false);
-    return;
-  }
-
-  // ✅ Validate email format
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    setError('Please enter a valid email address.');
-    setLoading(false);
-    return;
-  }
-
-  // ✅ Match passwords
-  if (password !== confirmPassword) {
-    setError('Passwords do not match.');
-    setLoading(false);
-    return;
-  }
-
-  // ✅ Validate password strength
-  const strongPasswordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&#^()[\]{}])[A-Za-z\d@$!%*?&#^()[\]{}]{8,}$/;
-  if (!strongPasswordRegex.test(password)) {
-    setError(
-      'Password must be at least 8 characters long and include letters, numbers, and special characters.'
-    );
-    setLoading(false);
-    return;
-  }
-
-  try {
-    await login({
-      name: fullName,
-      email,
-      plan: 'Pro',
-      profileImage: null,
-    });
-
-    router.replace('/(auth)/Billing');
-  } catch (e) {
-    setError('Signup failed. Please try again.');
-  }
-
-  setLoading(false);
-};
-
-
+  };
   const handleLoginLink = () => {
-    router.push('/(auth)/Signin');
+    router.push('/(auth)/Signin' as any);
   };
 
   return (
@@ -80,8 +87,8 @@ const handleSignup = async () => {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={styles.form}>
-        <Text style={styles.title}>Create Account</Text>
+      <View style={styles.form} className=''>
+        <Text style={styles.title} className='text-red-600'>Create Account</Text>
         <Text style={styles.label}>Full Name</Text>
         <TextInput
           style={styles.input}
@@ -148,6 +155,7 @@ const styles = StyleSheet.create({
     maxWidth: 400,
     backgroundColor: '#f9f9f9', // changed from dark
     borderRadius: 18,
+
     padding: 28,
     shadowColor: '#aaa',
     shadowOffset: { width: 0, height: 2 },
@@ -215,3 +223,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
+
+
