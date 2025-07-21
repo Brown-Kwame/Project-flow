@@ -1,6 +1,7 @@
 // Access the environment variable set in .env.local
 // EXPO_PUBLIC_ prefix is required for Expo projects to expose variables to client-side code.
 const API_GATEWAY_URL = process.env.EXPO_PUBLIC_API_GATEWAY_URL;
+console.log("API_GATEWAY_URL from .env.local:", API_GATEWAY_URL);
 
 if (!API_GATEWAY_URL) {
   console.error(
