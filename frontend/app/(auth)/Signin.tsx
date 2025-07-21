@@ -69,7 +69,8 @@ export default function LoginScreen() {
         plan: 'Pro',
         profileImage: null,
       });
-      router.replace('/(tabs)/index.tsx' as any); // Redirect to index page in tabs after login
+      // Correct navigation: go to the main tabs root, not /index
+      router.replace('/(tabs)'); // This will show the main tab screen after login
     } catch (e: any) {
       setError(e.message || 'Login failed. Please try again.');
     }
