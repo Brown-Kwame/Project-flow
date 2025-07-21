@@ -12,11 +12,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 import { ThemeContext } from './_layout';
+import { useUser } from '../context/UserContext';
+import { supabase } from '../../lib/supabase';
 
 const Explore = () => {
   const { setTheme, theme } = useContext(ThemeContext);
   const systemColorScheme = useSystemColorScheme();
   const router = useRouter();
+  const { profile, logout } = useUser();
   // Invite modal state
   const [inviteModalVisible, setInviteModalVisible] = useState(false);
   const [inviteInput, setInviteInput] = useState('');
@@ -34,13 +37,6 @@ const Explore = () => {
   const [unreadAll, setUnreadAll] = useState(0);
   // Account details modal state
   const [accountModalVisible, setAccountModalVisible] = useState(false);
-
-  // Sample user details (replace with real data)
-  const userDetails = {
-    name: 'Screw Yt18',
-    email: 'screw.yt18@gmail.com',
-    joined: '2025-06-01',
-  };
 
   // Fetch unread counts from AsyncStorage (simulate)
   React.useEffect(() => {
@@ -177,6 +173,18 @@ const Explore = () => {
   const cardText = colorMode === 'light' ? '#11181C' : themeColors.text;
   const titleColor = colorMode === 'light' ? '#687076' : themeColors.icon;
 
+  // Logout handler
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      await logout();
+      router.replace('/(auth)/Signin');
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Please try again.';
+      Alert.alert('Logout failed', message);
+    }
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: themeColors.background }}>
       {/* Top right user initials icon */}
@@ -199,7 +207,7 @@ const Explore = () => {
                 <FontAwesome name="building" size={20} color={cardText} style={{ marginRight: 14 }} />
                 <View style={{ flexShrink: 1 }}>
                   <Text style={{ color: cardText, fontSize: 17, fontWeight: '700', marginBottom: 2 }}>My workspace</Text>
-                  <Text style={{ color: titleColor, fontSize: 14 }} numberOfLines={1}>screw.yt18@gmail.com</Text>
+                  <Text style={{ color: titleColor, fontSize: 14 }} numberOfLines={1}>{profile.email}</Text>
                 </View>
               </View>
               <TouchableOpacity
@@ -211,20 +219,7 @@ const Explore = () => {
             </View>
           </View>
         </View>
-        {/* Plan Section */}
-        <View>
-          <Text style={{ color: titleColor, fontWeight: '600', fontSize: 15, marginBottom: 8 }}>Plan</Text>
-          <TouchableOpacity onPress={handleBilling} activeOpacity={0.8} style={{ backgroundColor: cardBg, borderRadius: 12, marginBottom: 24, padding: 16, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <FontAwesome name="users" size={20} color={cardText} style={{ marginRight: 14 }} />
-              <View>
-                <Text style={{ color: cardText, fontSize: 17, fontWeight: '700', marginBottom: 2 }}>Asana Personal</Text>
-                <Text style={{ color: titleColor, fontSize: 14 }} numberOfLines={1}>10 seats</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        </View>
-        {/* Notifications Section */}
+        {/* Notifications Section (Logout button placed here) */}
         <View>
           <Text style={{ color: titleColor, fontWeight: '600', fontSize: 15, marginBottom: 8 }}>Notifications</Text>
           <View style={{ backgroundColor: cardBg, borderRadius: 12, marginBottom: 24, padding: 16, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 }}>
@@ -239,6 +234,15 @@ const Explore = () => {
               <Text style={{ color: cardText, fontSize: 16, fontWeight: '600', flex: 1 }}>Push notifications</Text>
               <Text style={{ color: titleColor, fontSize: 14 }}>Manage</Text>
             </TouchableOpacity>
+            {/* Logout Button */}
+            <View style={{ marginTop: 18, alignItems: 'center' }}>
+              <TouchableOpacity
+                onPress={handleLogout}
+                style={{ backgroundColor: '#e74c3c', padding: 12, borderRadius: 8, minWidth: 120 }}
+              >
+                <Text style={{ color: '#fff', fontWeight: 'bold', textAlign: 'center' }}>Logout</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
         {/* Support Section */}
@@ -411,9 +415,8 @@ const Explore = () => {
         <View style={{ flex: 1, backgroundColor: '#000a', justifyContent: 'center', alignItems: 'center' }}>
           <View style={{ backgroundColor: '#fff', borderRadius: 20, padding: 24, minWidth: 320, alignItems: 'center' }}>
             <Text style={{ fontWeight: 'bold', fontSize: 22, marginBottom: 12, color: '#222' }}>Account Details</Text>
-            <Text style={{ fontSize: 16, marginBottom: 8 }}>Name: {userDetails.name}</Text>
-            <Text style={{ fontSize: 16, marginBottom: 8 }}>Email: {userDetails.email}</Text>
-            <Text style={{ fontSize: 16, marginBottom: 8 }}>Joined: {userDetails.joined}</Text>
+            <Text style={{ fontSize: 16, marginBottom: 8 }}>Name: {profile.name}</Text>
+            <Text style={{ fontSize: 16, marginBottom: 8 }}>Email: {profile.email}</Text>
             <TouchableOpacity onPress={() => setAccountModalVisible(false)} style={{ marginTop: 16 }}>
               <Text style={{ color: '#668cff', fontWeight: 'bold', fontSize: 16 }}>Close</Text>
             </TouchableOpacity>
