@@ -1,0 +1,126 @@
+[33m11b85beb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m before dockerization
+[33mbfecc7f4[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m proceed with your tasks
+[33m1ff620d5[m Use this frontend
+[33m9b2e0361[m Delete .vscode directory
+[33m98f32b4a[m Delete .expo directory
+[33m05d7a8dd[m Merge branch 'main' of https://github.com/Asana-Mobile-Team/FullStack
+[33m15e2c28a[m Merge branch 'main' of https://github.com/Asana-Mobile-Team/FullStack
+[33m740dc13d[m stuff
+[33me93c826b[m logout added to account page
+[33m5d19759f[m Errors detected in home page and task list page
+[33mc13e2ad2[m Merge branch 'main' of https://github.com/Asana-Mobile-Team/FullStack
+[33m27eeb911[m Home  page now displays after login I am yet to implement logout
+[33m36343808[m auth integrated using supabase
+[33m0ce7d234[m Chat screen and an inbox screen
+[33m38423fa2[m Merge branch 'main' of https://github.com/Asana-Mobile-Team/FullStack
+[33m71fa7702[m Resolve merge and restore service/config files
+[33m22783bf7[m updates
+[33m37c8dcc9[m Merge branch 'main' of https://github.com/Asana-Mobile-Team/FullStack
+[33mc696ce90[m Delete .vscode directory
+[33m0b4fe3b4[m Delete yarn.lock
+[33mbe8a10c2[m Delete package.json
+[33mf44c1e76[m Delete package-lock.json
+[33mf0d407b4[m Delete node_modules directory
+[33m499cc642[m Clone the app again
+[33m58d7db0e[m added a "continue" button below the billing page to reroute the user to the home screen
+[33m71e0628a[m added a message count to the notification bell that is seen on the icon and in the push notification card. Direct messages are now between recipient and sender. changed the chat boom icon to an envelope, created an icon at the far right of the homepage that links directly to direct messages card on push notifications. when the user initials at the account page is clicked, it shows login information. when system theme is changed, it affects every screen on the app. when texting in chat boom, message input box is slightly above keyboard to make texts visible.
+[33mf4b7522b[m Merge branch 'main' of https://github.com/Asana-Mobile-Team/FullStack
+[33mae93b500[m Used yarn add for the dependencies required and uninstalled npm dependencies.
+[33m229f93fb[m Delete node_modules directory
+[33mfa42d1f6[m Merge branch 'main' of https://github.com/Asana-Mobile-Team/FullStack
+[33md9897fb9[m functionalities and UI were changed
+[33m2560d7b7[m Add files via upload
+[33m1df635d7[m Merge branch 'main' of https://github.com/Asana-Mobile-Team/FullStack
+[33me1c201b9[m lol
+[33mc2ff4f7f[m Warn Errors have been resolved
+[33m9c0e829f[m Merge branch 'main' of https://github.com/Asana-Mobile-Team/FullStack
+[33mfafdbb1e[m Add user authentication
+[33m822f9494[m changed inbox tab to chat room, updated app.json with new icon and name
+[33m0ef12bb7[m icon has been updated to a new image, and the tab name has been changed to "Inbox" with a new icon.
+[33mbbb83ba8[m change to billing
+[33m06b48963[m Merge branches 'main' and 'main' of https://github.com/Asana-Mobile-Team/FullStack
+[33m7954ed68[m new update on Authscreen and Signin and billing page
+[33m87ab9eb2[m inbox has been added
+[33mab718bda[m Merge branch 'main' of https://github.com/Asana-Mobile-Team/FullStack
+[33m3b154bc0[m Inbox page added
+[33md37135da[m fontsize for the home page animation has been reduced
+[33m1ec3c690[m Create Page has been taken down
+[33m09152dea[m Icons for Tab navigation have been reduced to 3 One for home,another for tasks and the last for accounts
+[33me1763ab1[m Home Page UI has been modified
+[33mcbf22349[m installed expected version:  expo@53.0.19
+[33m4814f999[m Dark  theme for AuthScreen and also lot oof changes in most screens
+[33ma977b266[m 
+[33m27155883[m Merge branch 'main' of https://github.com/Asana-Mobile-Team/FullStack
+[33mc07a0a1d[m thanks kutah
+[33m718465a9[m hahahha
+[33m564069d7[m auth screen added
+[33m0afb1586[m auth screen added again
+[33mc41c9da8[m ggggg
+[33m52e66c74[m Merge branch 'main' of https://github.com/Asana-Mobile-Team/FullStack
+[33m3d31e2aa[m new one
+[33mbd77409b[m Merge branch 'main' of https://github.com/Asana-Mobile-Team/FullStack
+[33m1336c184[m Nothing lol
+[33m0517d4ea[m Merge branch 'main' of https://github.com/Asana-Mobile-Team/FullStack
+[33m64a49b84[m fixed Dashboard.tsx
+[33m19375ac3[m Merge branches 'main' and 'main' of https://github.com/Asana-Mobile-Team/FullStack
+[33m76a52afe[m authscreen appears first now
+[33m28523f62[m Merge branch 'main' of https://github.com/Asana-Mobile-Team/FullStack
+[33m0e6dd80b[m new updates
+[33m3a1697ca[m proceed
+[33m0f5fbcdd[m work on the home page
+[33m8394f4f2[m tabs navigation has been added
+[33ma8482061[m Signup screen now appears first then comes the login Yet to implement authentication using google or email and password and connect home screen Home scrreen and tabs have to be redesignend
+[33mfdf98235[m now the auth screen appears first
+[33m7376c471[m A little new updates
+[33mad1584f3[m Merge branch 'main' of https://github.com/Asana-Mobile-Team/FullStack
+[33mf2b53059[m little changs made to auth and explore pages
+[33m4f7e43d3[m Please try and make the AuthScreen appear as first screen
+[33m47879b37[m Merge branch 'main' of https://github.com/Asana-Mobile-Team/FullStack
+[33m3daaffa1[m progress
+[33m50092dfe[m Tailwind has been successfully added to your project!
+[33m5ce4ff00[m If you need tailwind you can finish the setup but do not push faulty code to repo
+[33m24b5e3f7[m You all set.Don't break anything
+[33ma40497a5[m Use this frontend app for the project Alright!
+[33mdc454df3[m New changes to the frontend app and Expo settings
+[33m81eb4859[m Added Expo frontend_app as part of main project
+[33mdc225ae7[m first commit
+[33md87af029[m The main frontend directory will be created soon.
+[33m1ef1056f[m does not exist or is empty
+[33m4eacd225[m Merge branch 'main' of https://github.com/Asana-Mobile-Team/FullStack
+[33m79806494[m changes
+[33m6a65115f[m Add files via upload
+[33m2c6f3da2[m Add backend microservices in 'backend' folder
+[33m3ce4d4bc[m Delete backend
+[33m76f381c5[m Create backend
+[33m4251ce9a[m Delete Backend/eurekaserver directory
+[33m244eaa4f[m Add files via upload
+[33m70f38ee7[m Delete backend
+[33m51f05b44[m Create backend
+[33mababf85c[m Delete Backend directory
+[33m2e3e71e2[m Create frontend_app2
+[33m084a07da[m Add files via upload
+[33m9836322d[m Modify the frontend_app to match asana app
+[33m1306534a[m Work on the frontend project here
+[33mc51e428a[m Add files via upload
+[33mfeab8330[m Errors have been corrected
+[33med7c549d[m indext and login.tsx have been moved to the auth folder.
+[33md6fcdd9c[m Merge branch 'main' of https://github.com/Asana-Mobile-Team/FullStack
+[33m63decb53[m  I have added modified the create page design  as well as the explore page design which  defines the user accounts and settings page  combined on a single page.  I have also added a new image for the explore page.  I have also modified the projects page design  to include a new image and updated the layout.  I have also updated the UserContext to include  the new user settings and account information.  I have also updated the package.json and yarn.lock  files to include the new dependencies and changes.
+[33mf522ca9f[m Add files via upload
+[33m4dd0004f[m Delete backend directory
+[33mb28850e2[m Create login.tsx
+[33m53c81e12[m Create indext.tsx
+[33m6b83112d[m Best practices have been used for the navigation
+[33mcf59e425[m frontend bugs, have been fixed in this commit.
+[33m7f0fef12[m I updated some of the styling
+[33mc3fa43b2[m Continue...
+[33m1e9bcdd0[m Deleted frontend folder and created another one
+[33mc0308948[m Create athentication.tsx
+[33mfdaffc17[m tailwind css has been tested and works run npm install before npx expo start
+[33m5af9550f[m INTEGRATION_GUIDELINES
+[33m614a9ac3[m integration Guidelines
+[33m5bc9ff5b[m integration Guidelines
+[33m44931198[m INTEGRATION_GUIDELINES
+[33m1d264135[m INTEGRATION_GUIDELINES
+[33md47d9cbf[m backend service added
+[33m6bb
