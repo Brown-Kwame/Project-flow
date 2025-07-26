@@ -14,7 +14,7 @@
     <name>eureka-server</name>
     <description>Eureka Server for Asana Clone Microservices</description>
     <properties>
-        <java.version>24</java.version> <!-- Or whatever Java version you are using for your project -->
+        <java.version>17</java.version> <!-- Or whatever Java version you are using for your project -->
         <spring-cloud.version>2025.0.0</spring-cloud.version> <!-- Ensure this matches your working Spring Cloud version -->
         <lombok.version>1.18.30</lombok.version>
     </properties>
@@ -82,7 +82,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version> <!-- Or your specific working version -->
+                <version>3.13.0</version> <!-- Or your specific working version -->
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>

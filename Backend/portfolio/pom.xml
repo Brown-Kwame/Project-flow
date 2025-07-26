@@ -14,7 +14,7 @@
     <name>portfolio-service</name>
     <description>Portfolio Service for Asana Clone Microservices</description>
     <properties>
-        <java.version>24</java.version>
+        		<java.version>17</java.version>
         <spring-cloud.version>2025.0.0</spring-cloud.version> <!-- Use the version that worked for Eureka Server -->
         <lombok.version>1.18.38</lombok.version> <!-- Ensure this matches your other services -->
     </properties>
