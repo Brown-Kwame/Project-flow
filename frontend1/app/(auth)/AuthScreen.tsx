@@ -31,7 +31,8 @@ const AuthScreen = () => {
   const leaderboardText = "Compete daily and build streaks. The leaderboard motivates you to stay consistent!";
 
   // Signup form states
-  const [fullName, setFullName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -70,35 +71,9 @@ const AuthScreen = () => {
     setError('');
     setLoading(true);
 
-    if (!fullName || !email || !password || !confirmPassword) {
-      setError('All fields are required.');
-      setLoading(false);
-      return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setError('Please enter a valid email address.');
-      setLoading(false);
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
-      setLoading(false);
-      return;
-    }
-
-    const strongPasswordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&#^()[\]{}])[A-Za-z\d@$!%*?&#^()[\]{}]{8,}$/;
-    if (!strongPasswordRegex.test(password)) {
-      setError('Password must include 8+ characters, numbers, letters, and symbols.');
-      setLoading(false);
-      return;
-    }
-
     try {
-      await login({ name: fullName, email, plan: 'Pro', profileImage: null });
-      router.replace('/(auth)/Billing' as any);
+      await login({ firstName, lastName, email, plan: 'Pro', profileImage: null });
+      router.replace('/(tabs)');
     } catch {
       setError('Signup failed. Please try again.');
     }
@@ -162,9 +137,9 @@ const AuthScreen = () => {
           <View style={styles.form}>
             <Text style={styles.title}>Create Account</Text>
             <Text style={styles.label}>First Name</Text>
-            <TextInput style={styles.input} placeholder="Your first name" value={fullName} onChangeText={setFullName} />
+            <TextInput style={styles.input} placeholder="Your first name" value={firstName} onChangeText={setFirstName} />
             <Text style={styles.label}>Last Name</Text>
-            <TextInput style={styles.input} placeholder="Your last name" value={fullName} onChangeText={setFullName} />
+            <TextInput style={styles.input} placeholder="Your last name" value={lastName} onChangeText={setLastName} />
 
             <Text style={styles.label}>Email</Text>
             <TextInput style={styles.input} placeholder="Your email" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />

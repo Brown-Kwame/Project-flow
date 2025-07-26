@@ -12,6 +12,8 @@ import {
   useColorScheme,
 } from 'react-native';
 import { useProjectContext } from '../context/ProjectContext';
+import { fetchProjectsByUserId, createProject, updateProject, deleteProject, Project } from '../../services/projectsApi';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // 
 
 const Projects = () => {
   const colorScheme = useColorScheme();

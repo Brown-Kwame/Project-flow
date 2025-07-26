@@ -1,4 +1,5 @@
-import API_GATEWAY_URL from '../config';
+import apiClient, { setAuthToken } from './api';
+const Auth_Service ='http://10.132.86.67:8092';
 
 // --- Interfaces (match your backend DTOs) ---
 export interface RegisterRequest {
@@ -26,48 +27,34 @@ export interface AuthResponse {
 
 export async function registerUser(data: RegisterRequest): Promise<AuthResponse> {
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/auth/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    const responseData: AuthResponse = await response.json();
-
-    if (!response.ok) {
-      // Backend returns message on error
-      throw new Error(responseData.message || `Registration failed with status: ${response.status}`);
+    const response = await apiClient.post('/users/register', data);
+    const authResponse = response.data;
+    
+    // Set the token for future requests
+    if (authResponse.token) {
+      setAuthToken(authResponse.token);
     }
-
-    return responseData;
-  } catch (error) {
+    
+    return authResponse;
+  } catch (error: any) {
     console.error('Error registering user:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Registration failed');
   }
 }
 
 export async function loginUser(data: LoginRequest): Promise<AuthResponse> {
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    const responseData: AuthResponse = await response.json();
-
-    if (!response.ok) {
-      // Backend returns message on error
-      throw new Error(responseData.message || `Login failed with status: ${response.status}`);
+    const response = await apiClient.post('/users/login', data);
+    const authResponse = response.data;
+    
+    // Set the token for future requests
+    if (authResponse.token) {
+      setAuthToken(authResponse.token);
     }
-
-    return responseData;
-  } catch (error) {
+    
+    return authResponse;
+  } catch (error: any) {
     console.error('Error logging in user:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Login failed');
   }
 }

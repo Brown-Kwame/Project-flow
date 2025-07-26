@@ -1,4 +1,5 @@
-import API_GATEWAY_URL from '../config';
+import apiClient from './api';
+const Task_Service ='http://10.132.86.67:8083';
 
 // --- Interfaces (match your backend Task entity/DTO) ---
 export interface Task {
@@ -14,115 +15,51 @@ export interface Task {
 
 // --- API Functions ---
 
-export async function fetchTasksByUserId(userId: number, jwtToken: string): Promise<Task[]> {
+export async function fetchTasksByUserId(userId: number): Promise<Task[]> {
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/tasks/user/${userId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${jwtToken}`,
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Failed to fetch tasks by user: ${response.status}`);
-    }
-
-    const data: Task[] = await response.json();
-    return data;
-  } catch (error) {
+    const response = await apiClient.get(`/tasks/user/${userId}`);
+    return response.data;
+  } catch (error: any) {
     console.error('Error fetching tasks by user:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to fetch tasks by user');
   }
 }
 
-export async function fetchTasksByProjectId(projectId: number, jwtToken: string): Promise<Task[]> {
+export async function fetchTasksByProjectId(projectId: number): Promise<Task[]> {
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/tasks/project/${projectId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${jwtToken}`,
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Failed to fetch tasks by project: ${response.status}`);
-    }
-
-    const data: Task[] = await response.json();
-    return data;
-  } catch (error) {
+    const response = await apiClient.get(`/tasks/project/${projectId}`);
+    return response.data;
+  } catch (error: any) {
     console.error('Error fetching tasks by project:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to fetch tasks by project');
   }
 }
 
-export async function createTask(newTask: Omit<Task, 'id' | 'creationDate' | 'lastUpdatedDate'>, jwtToken: string): Promise<Task> {
+export async function createTask(newTask: Omit<Task, 'id' | 'creationDate' | 'lastUpdatedDate'>): Promise<Task> {
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/tasks`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${jwtToken}`,
-      },
-      body: JSON.stringify(newTask),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Failed to create task: ${response.status}`);
-    }
-
-    const data: Task = await response.json();
-    return data;
-  } catch (error) {
+    const response = await apiClient.post('/tasks', newTask);
+    return response.data;
+  } catch (error: any) {
     console.error('Error creating task:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to create task');
   }
 }
 
-export async function updateTask(taskId: number, updatedTask: Task, jwtToken: string): Promise<Task> {
+export async function updateTask(taskId: number, updatedTask: Task): Promise<Task> {
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/tasks/${taskId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${jwtToken}`,
-      },
-      body: JSON.stringify(updatedTask),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Failed to update task: ${response.status}`);
-    }
-
-    const data: Task = await response.json();
-    return data;
-  } catch (error) {
+    const response = await apiClient.put(`/tasks/${taskId}`, updatedTask);
+    return response.data;
+  } catch (error: any) {
     console.error('Error updating task:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to update task');
   }
 }
 
-export async function deleteTask(taskId: number, jwtToken: string): Promise<void> {
+export async function deleteTask(taskId: number): Promise<void> {
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/tasks/${taskId}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${jwtToken}`,
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Failed to delete task: ${response.status}`);
-    }
-  } catch (error) {
+    await apiClient.delete(`/tasks/${taskId}`);
+  } catch (error: any) {
     console.error('Error deleting task:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to delete task');
   }
 }

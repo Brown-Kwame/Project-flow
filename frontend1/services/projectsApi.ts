@@ -1,4 +1,4 @@
-import API_GATEWAY_URL from '../config';
+import apiClient from './api';
 
 // --- Interfaces (match your backend Project entity/DTO) ---
 export interface Project {
@@ -13,115 +13,51 @@ export interface Project {
 
 // --- API Functions ---
 
-export async function fetchProjectsByUserId(userId: number, jwtToken: string): Promise<Project[]> {
+export async function fetchProjectsByUserId(userId: number): Promise<Project[]> {
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/projects/user/${userId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${jwtToken}`,
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Failed to fetch projects by user: ${response.status}`);
-    }
-
-    const data: Project[] = await response.json();
-    return data;
-  } catch (error) {
+    const response = await apiClient.get(`/projects/user/${userId}`);
+    return response.data;
+  } catch (error: any) {
     console.error('Error fetching projects by user:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to fetch projects by user');
   }
 }
 
-export async function fetchProjectsByPortfolioId(portfolioId: number, jwtToken: string): Promise<Project[]> {
+export async function fetchProjectsByPortfolioId(portfolioId: number): Promise<Project[]> {
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/projects/portfolio/${portfolioId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${jwtToken}`,
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Failed to fetch projects by portfolio: ${response.status}`);
-    }
-
-    const data: Project[] = await response.json();
-    return data;
-  } catch (error) {
+    const response = await apiClient.get(`/projects/portfolio/${portfolioId}`);
+    return response.data;
+  } catch (error: any) {
     console.error('Error fetching projects by portfolio:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to fetch projects by portfolio');
   }
 }
 
-export async function createProject(newProject: Omit<Project, 'id' | 'creationDate' | 'lastUpdatedDate'>, jwtToken: string): Promise<Project> {
+export async function createProject(newProject: Omit<Project, 'id' | 'creationDate' | 'lastUpdatedDate'>): Promise<Project> {
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/projects`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${jwtToken}`,
-      },
-      body: JSON.stringify(newProject),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Failed to create project: ${response.status}`);
-    }
-
-    const data: Project = await response.json();
-    return data;
-  } catch (error) {
+    const response = await apiClient.post('/projects', newProject);
+    return response.data;
+  } catch (error: any) {
     console.error('Error creating project:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to create project');
   }
 }
 
-export async function updateProject(projectId: number, updatedProject: Project, jwtToken: string): Promise<Project> {
+export async function updateProject(projectId: number, updatedProject: Project): Promise<Project> {
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/projects/${projectId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${jwtToken}`,
-      },
-      body: JSON.stringify(updatedProject),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Failed to update project: ${response.status}`);
-    }
-
-    const data: Project = await response.json();
-    return data;
-  } catch (error) {
+    const response = await apiClient.put(`/projects/${projectId}`, updatedProject);
+    return response.data;
+  } catch (error: any) {
     console.error('Error updating project:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to update project');
   }
 }
 
-export async function deleteProject(projectId: number, jwtToken: string): Promise<void> {
+export async function deleteProject(projectId: number): Promise<void> {
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/projects/${projectId}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${jwtToken}`,
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Failed to delete project: ${response.status}`);
-    }
-  } catch (error) {
+    await apiClient.delete(`/projects/${projectId}`);
+  } catch (error: any) {
     console.error('Error deleting project:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to delete project');
   }
 }

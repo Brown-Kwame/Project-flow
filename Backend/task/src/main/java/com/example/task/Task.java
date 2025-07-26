@@ -1,71 +1,133 @@
 package com.example.task;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "tasks")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Task {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", nullable = false, length = 255)
-    private String name;
+    @Column(nullable = false)
+    private String title;
 
-    @Column(name = "description", length = 1000)
+    @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
-    private TaskStatus status; // Now imported from TaskStatus.java
+    @Column(nullable = false)
+    private TaskStatus status;
 
-    @Column(name = "priority", nullable = false)
     @Enumerated(EnumType.STRING)
-    private TaskPriority priority; // Now imported from TaskPriority.java
+    @Column(nullable = false)
+    private TaskPriority priority;
 
-    @Column(name = "due_date")
-    private LocalDate dueDate;
+    private LocalDateTime dueDate;
 
-    @Column(name = "assigned_user_id")
-    private Long assignedUserId;
-
-    @Column(name = "project_id", nullable = false)
-    private Long projectId;
-
-    @Column(name = "section_id")
-    private Long sectionId;
-
-    @Column(name = "created_at", nullable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
-    
+
+    @Column(nullable = false)
+    private Long userId; // User assigned to this task
+
+    private Long projectId; // Optional: Project this task belongs to
+
+    // No-argument constructor
+    public Task() {
+    }
+
+    // Constructor for creating a new task (excluding ID and timestamps)
+    public Task(String title, String description, TaskStatus status, TaskPriority priority, LocalDateTime dueDate, Long userId, Long projectId) {
+        this.title = title;
+        this.description = description;
+        this.status = status;
+        this.priority = priority;
+        this.dueDate = dueDate;
+        this.userId = userId;
+        this.projectId = projectId;
+    }
+
+    // All-argument constructor (for full object creation/reconstruction)
+    public Task(Long id, String title, String description, TaskStatus status, TaskPriority priority, LocalDateTime dueDate, LocalDateTime createdAt, LocalDateTime updatedAt, Long userId, Long projectId) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.status = status;
+        this.priority = priority;
+        this.dueDate = dueDate;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.userId = userId;
+        this.projectId = projectId;
+    }
+
+    // Getters
+    public Long getId() { return id; }
+    public String getTitle() { return title; }
+    public String getDescription() { return description; }
+    public TaskStatus getStatus() { return status; }
+    public TaskPriority getPriority() { return priority; }
+    public LocalDateTime getDueDate() { return dueDate; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public Long getUserId() { return userId; }
+    public Long getProjectId() { return projectId; }
+
+    // Setters
+    public void setId(Long id) { this.id = id; }
+    public void setTitle(String title) { this.title = title; }
+    public void setDescription(String description) { this.description = description; }
+    public void setStatus(TaskStatus status) { this.status = status; }
+    public void setPriority(TaskPriority priority) { this.priority = priority; }
+    public void setDueDate(LocalDateTime dueDate) { this.dueDate = dueDate; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public void setUserId(Long userId) { this.userId = userId; }
+    public void setProjectId(Long projectId) { this.projectId = projectId; }
 
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
-        if (this.status == null) {
-            this.status = TaskStatus.NOT_STARTED;
-        }
-        if (this.priority == null) {
-            this.priority = TaskPriority.MEDIUM;
-        }
     }
 
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task = (Task) o;
+        return Objects.equals(id, task.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Task{" +
+               "id=" + id +
+               ", title='" + title + '\'' +
+               ", description='" + description + '\'' +
+               ", status=" + status +
+               ", priority=" + priority +
+               ", dueDate=" + dueDate +
+               ", createdAt=" + createdAt +
+               ", updatedAt=" + updatedAt +
+               ", userId=" + userId +
+               ", projectId=" + projectId +
+               '}';
     }
 }

@@ -1,113 +1,165 @@
 package com.example.task;
 
+import com.example.task.dto.CreateTaskRequest; // Import the DTO for creating tasks
+import com.example.task.dto.TaskResponse;
+import com.example.task.dto.UpdateTaskRequest; // Import the DTO for updating tasks
+import com.example.task.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/tasks")
+// @Data // REMOVE THIS LOMBOK ANNOTATION
+// @NoArgsConstructor // REMOVE THIS LOMBOK ANNOTATION
+// @AllArgsConstructor // REMOVE THIS LOMBOK ANNOTATION
 public class TaskController {
+
+    private static final Logger logger = LoggerFactory.getLogger(TaskController.class);
 
     @Autowired
     private TaskService taskService;
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class TaskRequest {
-        private String name;
-        private String description;
-        private TaskStatus status;
-        private TaskPriority priority;
-        private LocalDate dueDate;
-        private Long assignedUserId;
-        private Long projectId;
-        private Long sectionId;
+    // Helper to get authenticated user ID
+    private Long getAuthenticatedUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && authentication.getDetails() instanceof Long) {
+            return (Long) authentication.getDetails();
+        }
+        throw new SecurityException("User not authenticated or user ID not found in security context.");
     }
 
-    @PostMapping("/")
-    public ResponseEntity<Task> createTask(@RequestBody TaskRequest request) {
-        Task newTask = taskService.createTask(
-                request.getName(),
-                request.getDescription(),
-                request.getStatus(),
-                request.getPriority(),
-                request.getDueDate(),
-                request.getAssignedUserId(),
-                request.getProjectId(),
-                request.getSectionId()
-        );
-        return new ResponseEntity<>(newTask, HttpStatus.CREATED);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Task> getTaskById(@PathVariable Long id) {
-        Optional<Task> task = taskService.getTaskById(id);
-        return task.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Task> updateTask(@PathVariable Long id, @RequestBody TaskRequest request) {
-        Optional<Task> updatedTask = taskService.updateTask(
-                id,
-                request.getName(),
-                request.getDescription(),
-                request.getStatus(),
-                request.getPriority(),
-                request.getDueDate(),
-                request.getAssignedUserId(),
-                request.getProjectId(),
-                request.getSectionId()
-        );
-        return updatedTask.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
-        boolean deleted = taskService.deleteTask(id);
-        if (deleted) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    /**
+     * Retrieves tasks assigned to a specific user.
+     * Requires authentication, and the requested userId must match the authenticated user's ID.
+     * @param userId The ID of the user whose tasks are to be retrieved.
+     * @return ResponseEntity with a list of TaskResponse.
+     */
+    @GetMapping("/user/{userId}")
+    @PreAuthorize("isAuthenticated() and #userId == authentication.details")
+    public ResponseEntity<List<TaskResponse>> getTasksByUserId(@PathVariable Long userId) {
+        try {
+            logger.info("Received request to get tasks for user ID: {}", userId);
+            List<TaskResponse> tasks = taskService.getTasksByUserId(userId);
+            logger.info("Successfully retrieved {} tasks for user ID: {}", tasks.size(), userId);
+            return new ResponseEntity<>(tasks, HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error("Error fetching tasks for user ID {}: {}", userId, e.getMessage(), e);
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Task>> getTasksByAssignedUserId(@PathVariable Long userId) {
-        List<Task> tasks = taskService.getTasksByAssignedUserId(userId);
-        return new ResponseEntity<>(tasks, HttpStatus.OK);
-    }
-
-    @GetMapping("/project/{projectId}")
-    public ResponseEntity<List<Task>> getTasksByProjectId(@PathVariable Long projectId) {
-        List<Task> tasks = taskService.getTasksByProjectId(projectId);
-        return new ResponseEntity<>(tasks, HttpStatus.OK);
-    }
-
-    @GetMapping("/project/{projectId}/section/{sectionId}")
-    public ResponseEntity<List<Task>> getTasksByProjectIdAndSectionId(@PathVariable Long projectId, @PathVariable Long sectionId) {
-        List<Task> tasks = taskService.getTasksByProjectIdAndSectionId(projectId, sectionId);
-        return new ResponseEntity<>(tasks, HttpStatus.OK);
-    }
-
-    @GetMapping("/dueBefore/{dateString}")
-    public ResponseEntity<List<Task>> getTasksDueBefore(@PathVariable String dateString) {
+    /**
+     * Creates a new task.
+     * Requires authentication. The authenticated user ID will be assigned to the task.
+     * @param request The DTO containing the task details.
+     * @return ResponseEntity with the created TaskResponse.
+     */
+    @PostMapping
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<TaskResponse> createTask(@RequestBody CreateTaskRequest request) { // Corrected: Use CreateTaskRequest DTO
         try {
-            LocalDate date = LocalDate.parse(dateString);
-            List<Task> tasks = taskService.getTasksDueBefore(date);
-            return new ResponseEntity<>(tasks, HttpStatus.OK);
+            logger.info("Received request to create task: {}", request.getTitle());
+            // Ensure the userId in the request matches the authenticated user
+            if (!request.getUserId().equals(getAuthenticatedUserId())) {
+                throw new SecurityException("Task must be assigned to the authenticated user.");
+            }
+            TaskResponse createdTask = taskService.createTask(request);
+            logger.info("Task created successfully with ID: {}", createdTask.getId());
+            return new ResponseEntity<>(createdTask, HttpStatus.CREATED);
+        } catch (SecurityException e) {
+            logger.warn("Security error creating task: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            logger.error("Error creating task: {}", e.getMessage(), e);
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Updates an existing task.
+     * Requires authentication, and the authenticated user must be the task's assignee.
+     * @param taskId The ID of the task to update.
+     * @param request The DTO containing updated task details.
+     * @return ResponseEntity with the updated TaskResponse.
+     */
+    @PutMapping("/{taskId}")
+    @PreAuthorize("isAuthenticated() and @taskService.getTaskById(#taskId).orElse(null)?.userId == authentication.details")
+    public ResponseEntity<TaskResponse> updateTask(@PathVariable Long taskId, @RequestBody UpdateTaskRequest request) {
+        try {
+            logger.info("Received request to update task with ID: {}", taskId);
+            TaskResponse updatedTask = taskService.updateTask(taskId, request);
+            logger.info("Task with ID {} updated successfully.", updatedTask.getId());
+            return new ResponseEntity<>(updatedTask, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Task update failed for ID {}: {}", taskId, e.getMessage());
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            logger.error("Error updating task with ID {}: {}", taskId, e.getMessage(), e);
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Deletes a task by its ID.
+     * Requires authentication, and the authenticated user must be the task's assignee.
+     * @param taskId The ID of the task to delete.
+     * @return ResponseEntity with no content.
+     */
+    @DeleteMapping("/{taskId}")
+    @PreAuthorize("isAuthenticated() and @taskService.getTaskById(#taskId).orElse(null)?.userId == authentication.details")
+    public ResponseEntity<Void> deleteTask(@PathVariable Long taskId) {
+        try {
+            logger.info("Received request to delete task with ID: {}", taskId);
+            taskService.deleteTask(taskId);
+            logger.info("Task with ID {} deleted successfully.", taskId);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Task deletion failed for ID {}: {}", taskId, e.getMessage());
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            logger.error("Error deleting task with ID {}: {}", taskId, e.getMessage(), e);
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Retrieves a task by its ID.
+     * Requires authentication, and the authenticated user must be the task's assignee.
+     * @param taskId The ID of the task to retrieve.
+     * @return ResponseEntity with the TaskResponse.
+     */
+    @GetMapping("/{taskId}")
+    @PreAuthorize("isAuthenticated() and @taskService.getTaskById(#taskId).orElse(null)?.userId == authentication.details")
+    public ResponseEntity<TaskResponse> getTaskById(@PathVariable Long taskId) {
+        try {
+            logger.info("Received request to get task by ID: {}", taskId);
+            return taskService.getTaskById(taskId)
+                    .map(task -> {
+                        logger.info("Task with ID {} retrieved successfully.", taskId);
+                        return new ResponseEntity<>(task, HttpStatus.OK);
+                    })
+                    .orElseGet(() -> {
+                        logger.warn("Task with ID {} not found.", taskId);
+                        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                    });
+        } catch (Exception e) {
+            logger.error("Error retrieving task with ID {}: {}", taskId, e.getMessage(), e);
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

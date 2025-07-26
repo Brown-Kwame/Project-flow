@@ -1,5 +1,6 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { fetchTasksByUserId, createTask, updateTask, deleteTask, Task } from '../../services/tasksApi';
+import { useUser } from '../context/UserContext';
 import React, { useMemo, useState, useEffect } from 'react';
 import {
   ActivityIndicator,
@@ -14,22 +15,19 @@ import {
 } from 'react-native';
 import { Colors } from '@/constants/Colors';
 
-const demoTasks = [
-  { id: '1', title: 'Design Dashboard', status: 'In Progress', assignee: 'James', due: '2025-06-15' },
-  { id: '2', title: 'API Integration', status: 'To Do', assignee: 'Sarah', due: '2025-06-20' },
-  { id: '3', title: 'Team Meeting', status: 'Done', assignee: 'Alex', due: '2025-06-10' },
-  { id: '4', title: 'Write Docs', status: 'In Review', assignee: 'Chris', due: '2025-06-18' },
-];
-
-const TASKS_STORAGE_KEY = 'asana_tasks';
-
 export default function Tasks() {
+  const { profile } = useUser();
+  // You may need to get the JWT token from your auth context or storage
+  const jwtToken = '';
+ 
+  const userId = typeof (profile as any)?.id === 'number' ? (profile as any).id : 1;
+
   const [search, setSearch] = useState('');
-  const [tasks, setTasks] = useState(demoTasks);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [taskForm, setTaskForm] = useState({ title: '', status: 'To Do', assignee: '', due: '' });
+  const [taskForm, setTaskForm] = useState({ title: '', status: 'To Do' });
 
   const colorMode = useColorScheme() === 'dark' ? 'dark' : 'light';
   const theme = Colors[colorMode];
@@ -38,53 +36,85 @@ export default function Tasks() {
     if (!search) return tasks;
     return tasks.filter(t =>
       t.title.toLowerCase().includes(search.toLowerCase()) ||
-      t.status.toLowerCase().includes(search.toLowerCase()) ||
-      t.assignee.toLowerCase().includes(search.toLowerCase())
+      t.status.toLowerCase().includes(search.toLowerCase())
     );
   }, [search, tasks]);
 
-  const handleAddTask = () => {
-    setTasks(prev => [...prev, { ...taskForm, id: (Date.now() + Math.random()).toString() }]);
-    setModalVisible(false);
-    setTaskForm({ title: '', status: 'To Do', assignee: '', due: '' });
-    setEditId(null);
+  const handleAddTask = async () => {
+    setLoading(true);
+    try {
+      const newTask: Omit<Task, 'id' | 'creationDate' | 'lastUpdatedDate'> = {
+        title: taskForm.title,
+        status: taskForm.status as any,
+        description: '',
+        userId,
+        projectId: 1, // Replace with actual project ID if needed
+      };
+      const created = await createTask(newTask, jwtToken);
+      setTasks(prev => [...prev, created]);
+      setModalVisible(false);
+      setTaskForm({ title: '', status: 'To Do' });
+      setEditId(null);
+    } catch (e) {
+      // handle error
+    }
+    setLoading(false);
   };
 
-  const handleEditTask = (task: any) => {
-    setEditId(task.id);
-    setTaskForm({ title: task.title, status: task.status, assignee: task.assignee, due: task.due });
+  const handleEditTask = (task: Task) => {
+    setEditId(task.id ? String(task.id) : null);
+    setTaskForm({ title: task.title, status: task.status });
     setModalVisible(true);
   };
 
-  const handleUpdateTask = () => {
-    setTasks(prev => prev.map(t => (t.id === editId ? { ...t, ...taskForm } : t)));
-    setModalVisible(false);
-    setTaskForm({ title: '', status: 'To Do', assignee: '', due: '' });
-    setEditId(null);
+  const handleUpdateTask = async () => {
+    if (!editId) return;
+    setLoading(true);
+    try {
+      const updated: Task = {
+        id: Number(editId),
+        title: taskForm.title,
+        status: taskForm.status as any,
+        description: '',
+        userId,
+        projectId: 1, // Replace with actual project ID if needed
+      };
+      const result = await updateTask(Number(editId), updated, jwtToken);
+      setTasks(prev => prev.map(t => (String(t.id) === editId ? result : t)));
+      setModalVisible(false);
+      setTaskForm({ title: '', status: 'To Do' });
+      setEditId(null);
+    } catch (e) {
+      // handle error
+    }
+    setLoading(false);
   };
 
-  const handleDeleteTask = (id: string) => {
-    setTasks(prev => prev.filter(t => t.id !== id));
+  const handleDeleteTask = async (id: string) => {
+    setLoading(true);
+    try {
+      await deleteTask(Number(id), jwtToken);
+      setTasks(prev => prev.filter(t => String(t.id) !== id));
+    } catch (e) {
+      // handle error
+    }
+    setLoading(false);
   };
 
   useEffect(() => {
     const loadTasks = async () => {
       setLoading(true);
       try {
-        const stored = await AsyncStorage.getItem(TASKS_STORAGE_KEY);
-        if (stored) setTasks(JSON.parse(stored));
-      } catch {
-        setTasks(demoTasks);
+        const fetched = await fetchTasksByUserId(userId, jwtToken);
+        setTasks(fetched);
+      } catch (e) {
+        setTasks([]);
       } finally {
         setLoading(false);
       }
     };
     loadTasks();
-  }, []);
-
-  useEffect(() => {
-    AsyncStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(tasks)).catch(() => {});
-  }, [tasks]);
+  }, [userId, jwtToken]);
 
   const renderStatusBadge = (status: string) => {
     let bgColor = 'bg-gray-400';
@@ -108,7 +138,7 @@ export default function Tasks() {
           className="w-11 h-11 bg-blue-500 rounded-full items-center justify-center border-2 border-blue-500 shadow-lg"
           onPress={() => {
             setEditId(null);
-            setTaskForm({ title: '', status: 'To Do', assignee: '', due: '' });
+            setTaskForm({ title: '', status: 'To Do' });
             setModalVisible(true);
           }}
         >
@@ -129,7 +159,7 @@ export default function Tasks() {
       ) : (
         <FlatList
           data={filteredTasks}
-          keyExtractor={item => item.id}
+          keyExtractor={item => String(item.id)}
           contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: 8 }}
           ListEmptyComponent={
             <Text className="text-center text-gray-500 mt-10 dark:text-neutral-400">No tasks found.</Text>
@@ -144,18 +174,12 @@ export default function Tasks() {
                     <TouchableOpacity onPress={() => handleEditTask(item)}>
                       <FontAwesome name="edit" size={20} color={theme.tint} style={{ marginRight: 16 }} />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => handleDeleteTask(item.id)}>
+                    <TouchableOpacity onPress={() => handleDeleteTask(String(item.id))}>
                       <FontAwesome name="trash" size={20} color="#ff4d4d" />
                     </TouchableOpacity>
                   </View>
                 </View>
               </View>
-              <Text className="text-sm text-gray-600 dark:text-neutral-300">
-                Assignee: <Text className="text-blue-500 font-medium">{item.assignee}</Text>
-              </Text>
-              <Text className="text-sm text-gray-600 dark:text-neutral-300">
-                Due: <Text className="text-blue-500 font-medium">{item.due}</Text>
-              </Text>
             </View>
           )}
         />
@@ -182,20 +206,7 @@ export default function Tasks() {
               value={taskForm.status}
               onChangeText={text => setTaskForm({ ...taskForm, status: text })}
             />
-            <TextInput
-              className="border border-gray-300 dark:border-gray-600 rounded-md px-4 py-3 mb-3 text-black dark:text-white bg-white dark:bg-neutral-800"
-              placeholder="Assignee"
-              placeholderTextColor={theme.icon}
-              value={taskForm.assignee}
-              onChangeText={text => setTaskForm({ ...taskForm, assignee: text })}
-            />
-            <TextInput
-              className="border border-gray-300 dark:border-gray-600 rounded-md px-4 py-3 mb-4 text-black dark:text-white bg-white dark:bg-neutral-800"
-              placeholder="Due Date (YYYY-MM-DD)"
-              placeholderTextColor={theme.icon}
-              value={taskForm.due}
-              onChangeText={text => setTaskForm({ ...taskForm, due: text })}
-            />
+            {/* Assignee and Due fields removed as they are not in Task type */}
             <View className="flex-row justify-end space-x-4">
               <Pressable onPress={() => setModalVisible(false)}>
                 <Text className="text-blue-500 font-bold">Cancel</Text>

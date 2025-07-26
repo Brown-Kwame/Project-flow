@@ -13,6 +13,7 @@ import {
   useColorScheme,
 } from 'react-native';
 
+import { fetchGoals, createGoal, updateGoal, deleteGoal, Goal } from '../../services/goalsApi';
 const demoGoals = [
   { id: '1', title: 'Launch New Feature', status: 'In Progress', owner: 'James', due: '2025-07-01' },
   { id: '2', title: 'Increase User Retention', status: 'To Do', owner: 'Sarah', due: '2025-08-01' },

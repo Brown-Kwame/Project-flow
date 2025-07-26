@@ -1,23 +1,26 @@
-# File: application.yml
-# Path: your-api-gateway-project/src/main/resources/application.yml
+
 
 server:
-  port: 8094 # The default port for the API Gateway. All client requests will hit this.
+  port: 8094
 
 spring:
   application:
-    name: api-gateway # The name of this service, used by Eureka
+    name: API-GATEWAY
   cloud:
     gateway:
-      webflux: # Spring Cloud Gateway uses Spring WebFlux
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: false
+      webflux: 
         cors:
           filter:
             cors-configurations:
-              '[/**]': # Apply CORS to all paths
+              '[/**]': 
                 allowed-origins:
-                  - "http://localhost:19000" # Add your React Native development URL (e.g., Expo)
-                  - "http://localhost:8081"  # Add your React Native web build URL if applicable
-                  - "http://localhost:3000"  # Common for React web app
+                  - "http://localhost:19000" 
+                  - "http://localhost:8081" 
+                  - "http://localhost:3000"  
                 allowed-methods:
                   - "GET"
                   - "POST"
@@ -27,16 +30,16 @@ spring:
                 allowed-headers:
                   - "*" # Allow all headers, including Authorization for JWT
                 allow-credentials: true # Allow sending cookies and HTTP authentication headers
-                max-age: 3600 # How long the pre-flight request can be cached (in seconds)
+                max-age: 3600 
 
       routes:
         # Route for User Service
         - id: user-service
-          uri: lb://USER-SERVICE # 'lb://' indicates load-balancing via Eureka Service ID
+          uri: lb://USER-SERVICE 
           predicates:
-            - Path=/users/** # Matches any request starting with /users/
+            - Path=/users/** 
           filters:
-            - RewritePath=/users/(?<segment>.*), /users/${segment} # Rewrites /users/xyz to /users/xyz for the target service
+            - RewritePath=/users/(?<segment>.*), /users/${segment} 
 
         # Route for Notification Service
         - id: notification-service
@@ -91,6 +94,15 @@ spring:
             - Path=/api/chat/** # REST endpoints for chat (e.g., /api/chat/send, /api/chat/history)
           filters:
             - RewritePath=/api/chat/(?<segment>.*), /${segment} # Remove /api/chat from path
+
+
+        # NEW: Route for Team Service
+        - id: team-service
+          uri: lb://TEAM-SERVICE # 'lb://' indicates load balancing via Eureka
+          predicates:
+            - Path=/teams/** # All requests starting with /teams/ will go to TEAM-SERVICE
+          filters:
+            - RewritePath=/teams/(?<segment>.*), /${segment}
 
 
 

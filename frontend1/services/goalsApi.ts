@@ -1,5 +1,5 @@
 
-import API_GATEWAY_URL from '../config';
+import apiClient from './api';
 
 // --- Interfaces (match your backend Goal entity/DTO) ---
 export interface Goal {
@@ -15,92 +15,41 @@ export interface Goal {
 
 // --- API Functions ---
 
-export async function fetchGoals(userId: number, jwtToken: string): Promise<Goal[]> {
+export async function fetchGoals(userId: number): Promise<Goal[]> {
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/goals/user/${userId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${jwtToken}`,
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Failed to fetch goals: ${response.status}`);
-    }
-
-    const data: Goal[] = await response.json();
-    return data;
-  } catch (error) {
+    const response = await apiClient.get(`/goals/user/${userId}`);
+    return response.data;
+  } catch (error: any) {
     console.error('Error fetching goals:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to fetch goals');
   }
 }
 
-export async function createGoal(newGoal: Omit<Goal, 'id' | 'creationDate' | 'lastUpdatedDate'>, jwtToken: string): Promise<Goal> {
+export async function createGoal(newGoal: Omit<Goal, 'id' | 'creationDate' | 'lastUpdatedDate'>): Promise<Goal> {
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/goals`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${jwtToken}`,
-      },
-      body: JSON.stringify(newGoal),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Failed to create goal: ${response.status}`);
-    }
-
-    const data: Goal = await response.json();
-    return data;
-  } catch (error) {
+    const response = await apiClient.post('/goals', newGoal);
+    return response.data;
+  } catch (error: any) {
     console.error('Error creating goal:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to create goal');
   }
 }
 
-export async function updateGoal(goalId: number, updatedGoal: Goal, jwtToken: string): Promise<Goal> {
+export async function updateGoal(goalId: number, updatedGoal: Goal): Promise<Goal> {
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/goals/${goalId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${jwtToken}`,
-      },
-      body: JSON.stringify(updatedGoal),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Failed to update goal: ${response.status}`);
-    }
-
-    const data: Goal = await response.json();
-    return data;
-  } catch (error) {
+    const response = await apiClient.put(`/goals/${goalId}`, updatedGoal);
+    return response.data;
+  } catch (error: any) {
     console.error('Error updating goal:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to update goal');
   }
 }
 
-export async function deleteGoal(goalId: number, jwtToken: string): Promise<void> {
+export async function deleteGoal(goalId: number): Promise<void> {
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/goals/${goalId}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${jwtToken}`,
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Failed to delete goal: ${response.status}`);
-    }
-  } catch (error) {
+    await apiClient.delete(`/goals/${goalId}`);
+  } catch (error: any) {
     console.error('Error deleting goal:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to delete goal');
   }
 }

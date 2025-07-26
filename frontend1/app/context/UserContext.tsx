@@ -3,19 +3,20 @@ import React, { createContext, ReactNode, useContext, useEffect, useState } from
 
 const PROFILE_STORAGE_KEY = 'asana_profile';
 const DEFAULT_PROFILE = {
-  name: 'James Doe',
+  firstName: 'James ',
+  lastName: 'Doe',
   email: 'james@futurist.com',
   plan: 'Pro',
   profileImage: null,
 };
 
 type Profile = {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   plan: string;
   profileImage: string | null;
 };
-
 // Add authentication state and methods
 // Only treat as authenticated if profile is not the default
 

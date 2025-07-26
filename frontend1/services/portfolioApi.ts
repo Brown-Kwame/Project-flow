@@ -1,4 +1,4 @@
-import API_GATEWAY_URL from '../config';
+import apiClient from './api';
 
 // --- Interfaces (match your backend Portfolio entity/DTO) ---
 export interface Portfolio {
@@ -12,92 +12,41 @@ export interface Portfolio {
 
 // --- API Functions ---
 
-export async function fetchPortfoliosByUserId(userId: number, jwtToken: string): Promise<Portfolio[]> {
+export async function fetchPortfoliosByUserId(userId: number): Promise<Portfolio[]> {
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/portfolios/user/${userId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${jwtToken}`,
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Failed to fetch portfolios by user: ${response.status}`);
-    }
-
-    const data: Portfolio[] = await response.json();
-    return data;
-  } catch (error) {
+    const response = await apiClient.get(`/portfolios/user/${userId}`);
+    return response.data;
+  } catch (error: any) {
     console.error('Error fetching portfolios by user:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to fetch portfolios by user');
   }
 }
 
-export async function createPortfolio(newPortfolio: Omit<Portfolio, 'id' | 'creationDate' | 'lastUpdatedDate'>, jwtToken: string): Promise<Portfolio> {
+export async function createPortfolio(newPortfolio: Omit<Portfolio, 'id' | 'creationDate' | 'lastUpdatedDate'>): Promise<Portfolio> {
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/portfolios`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${jwtToken}`,
-      },
-      body: JSON.stringify(newPortfolio),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Failed to create portfolio: ${response.status}`);
-    }
-
-    const data: Portfolio = await response.json();
-    return data;
-  } catch (error) {
+    const response = await apiClient.post('/portfolios', newPortfolio);
+    return response.data;
+  } catch (error: any) {
     console.error('Error creating portfolio:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to create portfolio');
   }
 }
 
-export async function updatePortfolio(portfolioId: number, updatedPortfolio: Portfolio, jwtToken: string): Promise<Portfolio> {
+export async function updatePortfolio(portfolioId: number, updatedPortfolio: Portfolio): Promise<Portfolio> {
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/portfolios/${portfolioId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${jwtToken}`,
-      },
-      body: JSON.stringify(updatedPortfolio),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Failed to update portfolio: ${response.status}`);
-    }
-
-    const data: Portfolio = await response.json();
-    return data;
-  } catch (error) {
+    const response = await apiClient.put(`/portfolios/${portfolioId}`, updatedPortfolio);
+    return response.data;
+  } catch (error: any) {
     console.error('Error updating portfolio:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to update portfolio');
   }
 }
 
-export async function deletePortfolio(portfolioId: number, jwtToken: string): Promise<void> {
+export async function deletePortfolio(portfolioId: number): Promise<void> {
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/portfolios/${portfolioId}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${jwtToken}`,
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Failed to delete portfolio: ${response.status}`);
-    }
-  } catch (error) {
+    await apiClient.delete(`/portfolios/${portfolioId}`);
+  } catch (error: any) {
     console.error('Error deleting portfolio:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to delete portfolio');
   }
 }

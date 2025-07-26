@@ -13,7 +13,6 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useUser } from '../context/UserContext'; // Import useUser
 import { loginUser } from '../../services/authApi'; // Import loginUser from authApi
-import { supabase } from '../../lib/supabase'; // Import supabase client
 
 export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
@@ -42,35 +41,15 @@ export default function LoginScreen() {
     setError('');
     setLoading(true);
     try {
-      if (!email || !password) {
-        setError('Email and password are required.');
-        setLoading(false);
-        return;
-      }
-      // Supabase login
-      const { data, error: supaError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (supaError) {
-        setError(supaError.message || 'Login failed. Please try again.');
-        setLoading(false);
-        return;
-      }
-      // Only update context and navigate if session is present
-      if (!data.session) {
-        setError('Login failed. Please check your credentials and try again.');
-        setLoading(false);
-        return;
-      }
+      const response = await loginUser({ email, password });
       await login({
-        name: data.user.user_metadata?.full_name || data.user.email,
-        email: data.user.email ?? '',
+        firstName: response.firstName,
+        lastName: response.lastName,
+        email: response.email,
         plan: 'Pro',
         profileImage: null,
       });
-      // Correct navigation: go to the main tabs root, not /index
-      router.replace('/(tabs)'); // This will show the main tab screen after login
+      router.replace('/(tabs)');
     } catch (e: any) {
       setError(e.message || 'Login failed. Please try again.');
     }
@@ -144,7 +123,7 @@ export default function LoginScreen() {
     {/* Manual link to index page in tabs */}
     {/* Signup */}
     <Text style={styles.signupText}>
-      Don't have an account?{' '}
+      Don&apos;t have an account?{' '}
       <Text
         style={styles.signupLink}
         onPress={() => router.push('/(auth)/signup' as any)}

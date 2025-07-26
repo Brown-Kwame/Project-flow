@@ -1,67 +1,46 @@
-import API_GATEWAY_URL from '../config';
+import apiClient from './api';
+const User_Service ='http://10.132.86.67:8086';
 
-// --- Interfaces (match your backend User entity/DTO) ---
 export interface User {
   id: number;
   firstName: string;
   lastName: string;
   email: string;
-  // Do NOT include password hash here
-  // Add other user profile fields as needed
 }
 
 export interface UserUpdateRequest {
   firstName?: string;
   lastName?: string;
   email?: string;
-  // Add other updatable fields
 }
 
-// --- API Functions ---
-
-export async function getUserById(userId: number, jwtToken: string): Promise<User> {
+export async function getUserById(userId: number): Promise<User> {
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/users/${userId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${jwtToken}`,
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Failed to fetch user: ${response.status}`);
-    }
-
-    const data: User = await response.json();
-    return data;
-  } catch (error) {
+    const response = await apiClient.get(`/users/${userId}`);
+    return response.data;
+  } catch (error: any) {
     console.error('Error fetching user:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to fetch user');
   }
 }
 
-export async function updateUser(userId: number, data: UserUpdateRequest, jwtToken: string): Promise<User> {
+export async function updateUser(userId: number, data: UserUpdateRequest): Promise<User> {
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/users/${userId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${jwtToken}`,
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Failed to update user: ${response.status}`);
-    }
-
-    const updatedUser: User = await response.json();
-    return updatedUser;
-  } catch (error) {
+    const response = await apiClient.put(`/users/${userId}`, data);
+    return response.data;
+  } catch (error: any) {
     console.error('Error updating user:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to update user');
+  }
+}
+
+// Register a new user via API Gateway
+export async function registerUser({ firstName, lastName, email, password }: { firstName: string; lastName: string; email: string; password: string; }) {
+  try {
+    const response = await apiClient.post('/users/register', { firstName, lastName, email, password });
+    return response.data;
+  } catch (error: any) {
+    console.error('Error registering user:', error);
+    throw new Error(error.response?.data?.message || 'Registration failed');
   }
 }
