@@ -14,10 +14,10 @@
     <name>auth-service</name>
     <description>Authentication Service for Asana Clone Microservices</description>
     <properties>
-        <java.version>24</java.version>
+        <java.version>17</java.version>
         <spring-cloud.version>2025.0.0</spring-cloud.version> <!-- Use the version that worked for Eureka Server -->
         <jjwt.version>0.11.5</jjwt.version>
-        <lombok.version>1.18.38</lombok.version> <!-- Latest JJWT version compatible with Java 24+ -->
+        <lombok.version>1.18.38</lombok.version> <!-- Latest JJWT version compatible with Java 17+ -->
     </properties>
     <dependencies>
         <!-- Spring Boot Starters -->
@@ -120,8 +120,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version> <!-- ENSURE THIS IS 3.13.0 -->
                 <configuration>
-                    <source>24</source> <!-- Your target Java source version -->
-                    <target>24</target> <!-- Your target Java bytecode version -->
+                    <source>17</source> <!-- Your target Java source version -->
+                    <target>17</target> <!-- Your target Java bytecode version -->
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
@@ -130,7 +130,7 @@
                         </path>
                     </annotationProcessorPaths>
                     <jdkToolchain> <!-- ENSURE THIS IS PRESENT AND CORRECT -->
-                        <version>24</version> <!-- Your actual JDK version for compilation -->
+                        <version>17</version> <!-- Your actual JDK version for compilation -->
                         <vendor>oracle</vendor> <!-- Match vendor from toolchains.xml -->
                     </jdkToolchain>
                 </configuration>

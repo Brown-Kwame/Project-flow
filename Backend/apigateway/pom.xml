@@ -14,7 +14,7 @@
     <name>api-gateway</name>
     <description>API Gateway for Asana Clone Microservices</description>
     <properties>
-        <java.version>24</java.version>
+        		<java.version>17</java.version>
         <spring-cloud.version>2025.0.0</spring-cloud.version> <!-- Use a compatible Spring Cloud version -->
     </properties>
     <dependencies>

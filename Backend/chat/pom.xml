@@ -14,7 +14,7 @@
     <name>chat-service</name>
     <description>Chat Service for Asana Clone Microservices</description>
     <properties>
-        <java.version>24</java.version>
+        		<java.version>17</java.version>
         <spring-cloud.version>2025.0.0</spring-cloud.version>
         <lombok.version>1.18.30</lombok.version>
         <jjwt.version>0.11.5</jjwt.version>
