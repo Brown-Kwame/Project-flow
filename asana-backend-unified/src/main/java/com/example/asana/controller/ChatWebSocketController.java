@@ -1,0 +1,51 @@
+package com.example.asana.controller;
+
+import com.example.asana.model.Chat;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Controller;
+
+@Controller
+public class ChatWebSocketController {
+
+    private final SimpMessagingTemplate messagingTemplate;
+
+    public ChatWebSocketController(SimpMessagingTemplate messagingTemplate) {
+        this.messagingTemplate = messagingTemplate;
+    }
+
+    // Handle incoming chat messages
+    @MessageMapping("/chat.sendMessage")
+    public void sendMessage(@Payload Chat chat) {
+        // Save chat to DB here if needed
+        // Broadcast to all users in the chat (for group) or to a specific user (for private)
+        messagingTemplate.convertAndSend("/topic/chat." + chat.getRecipientId(), chat);
+    }
+
+    // Handle typing indicator
+    @MessageMapping("/chat.typing")
+    public void typing(@Payload TypingIndicator indicator) {
+        messagingTemplate.convertAndSend("/topic/chat." + indicator.getChatId() + ".typing", indicator);
+    }
+
+    // TypingIndicator class
+    public static class TypingIndicator {
+        private Long chatId;
+        private Long userId;
+        private boolean isTyping;
+
+        public TypingIndicator() {}
+        public TypingIndicator(Long chatId, Long userId, boolean isTyping) {
+            this.chatId = chatId;
+            this.userId = userId;
+            this.isTyping = isTyping;
+        }
+        public Long getChatId() { return chatId; }
+        public void setChatId(Long chatId) { this.chatId = chatId; }
+        public Long getUserId() { return userId; }
+        public void setUserId(Long userId) { this.userId = userId; }
+        public boolean isTyping() { return isTyping; }
+        public void setTyping(boolean typing) { isTyping = typing; }
+    }
+} 

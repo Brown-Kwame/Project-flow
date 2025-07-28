@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: asana-postgres
+    environment:
+      POSTGRES_DB: asana_db
+      POSTGRES_USER: asanauser
+      POSTGRES_PASSWORD: asanapassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - asana-network
+
+  asana-backend:
+    build: .
+    container_name: asana-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/asana_db
+      SPRING_DATASOURCE_USERNAME: asanauser
+      SPRING_DATASOURCE_PASSWORD: asanapassword
+    depends_on:
+      - postgres
+    networks:
+      - asana-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  asana-network:
+    driver: bridge 

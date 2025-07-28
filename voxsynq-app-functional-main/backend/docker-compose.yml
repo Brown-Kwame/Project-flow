@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  postgres_db:
+    image: postgres:15
+    container_name: skype_clone_postgres
+    environment:
+      POSTGRES_USER: skypeuser
+      POSTGRES_PASSWORD: skypepassword
+      POSTGRES_DB: skype_clone_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  skype_backend:
+    build: .
+    container_name: skype_clone_backend_app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres_db
+    environment:
+      # Database configuration
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_db:5432/skype_clone_db
+      SPRING_DATASOURCE_USERNAME: skypeuser
+      SPRING_DATASOURCE_PASSWORD: skypepassword
+      # Application configuration
+      APP_BASE_URL: http://192.168.0.151:8080
+      # Other environment variables like JWT secret can be set here too for better security
+      # APP_JWT_SECRET: YourSuperSecretJWTKeyForSkypeCloneAppFromDockerCompose
+    restart: on-failure
+    volumes:
+      - ./uploads:/app/uploads
+
+volumes:
+  postgres_data:

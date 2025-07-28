@@ -1,0 +1,12 @@
+{
+  "name": "asana-api-tests",
+  "version": "1.0.0",
+  "description": "Automated API tests for Asana backend",
+  "main": "test-api.js",
+  "scripts": {
+    "test": "node test-api.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+} 

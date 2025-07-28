@@ -2,3 +2,7 @@
 # yarn lockfile v1
 
 
+"@stomp/stompjs@^7.1.1":
+  version "7.1.1"
+  resolved "https://registry.npmjs.org/@stomp/stompjs/-/stompjs-7.1.1.tgz"
+  integrity sha512-chcDs6YkAnKp1FqzwhGvh3i7v0+/ytzqWdKYw6XzINEKAzke/iD00dNgFPWSZEqktHOK+C1gSzXhLkLbARIaZw==
