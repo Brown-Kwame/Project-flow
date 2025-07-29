@@ -5,7 +5,9 @@ import com.example.asana.exception.ResourceNotFoundException;
 import com.example.asana.model.Goals;
 import com.example.asana.model.GoalsStatus;
 import com.example.asana.model.Task;
+import com.example.asana.model.TaskStatus;
 import com.example.asana.model.Project;
+import com.example.asana.model.ProjectStatus;
 import com.example.asana.repository.GoalsRepository;
 import com.example.asana.repository.TaskRepository;
 import com.example.asana.repository.ProjectRepository;
@@ -108,11 +110,11 @@ public class GoalsService {
         Goals goal = goalRepository.findById(goalId)
                 .orElseThrow(() -> new ResourceNotFoundException("Goal not found with id: " + goalId));
 
-        // Get completed tasks for the goal owner
-        List<Task> completedTasks = taskRepository.findByAssignedUser_IdAndStatus(goal.getOwnerUserId(), "COMPLETED");
+        // Get completed tasks for this specific goal
+        List<Task> completedTasks = taskRepository.findByGoalIdAndStatus(goalId, TaskStatus.COMPLETED);
         
-        // Get completed projects for the goal owner
-        List<Project> completedProjects = projectRepository.findByOwnerUser_IdAndStatus(goal.getOwnerUserId(), "COMPLETED");
+        // Get completed projects for this specific goal
+        List<Project> completedProjects = projectRepository.findByGoalIdAndStatus(goalId, ProjectStatus.COMPLETED);
 
         // Calculate progress based on completed items
         double taskProgress = completedTasks.size() * 1.0; // Each task = 1 point
@@ -143,15 +145,30 @@ public class GoalsService {
      * Get goal progress data for the last 7 days with proper daily tracking
      */
     public List<GoalProgressData> getGoalProgressData(Long goalId) {
-        Goals goal = goalRepository.findById(goalId)
-                .orElseThrow(() -> new ResourceNotFoundException("Goal not found with id: " + goalId));
+        try {
+            System.out.println("Getting goal progress data for goal ID: " + goalId);
+            
+            Goals goal = goalRepository.findById(goalId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Goal not found with id: " + goalId));
 
-        List<GoalProgressData> progressData = new ArrayList<>();
-        LocalDate today = LocalDate.now();
+            System.out.println("Found goal: " + goal.getName() + " with owner user ID: " + goal.getOwnerUserId());
 
-        // Get all completed tasks and projects for the goal owner
-        List<Task> allCompletedTasks = taskRepository.findByAssignedUser_IdAndStatus(goal.getOwnerUserId(), "COMPLETED");
-        List<Project> allCompletedProjects = projectRepository.findByOwnerUser_IdAndStatus(goal.getOwnerUserId(), "COMPLETED");
+            List<GoalProgressData> progressData = new ArrayList<>();
+            LocalDate today = LocalDate.now();
+
+            // Get all completed tasks and projects for the goal owner
+            Long ownerUserId = goal.getOwnerUserId();
+            if (ownerUserId == null) {
+                throw new IllegalArgumentException("Goal owner user ID is null");
+            }
+
+            System.out.println("Fetching completed tasks for goal ID: " + goalId);
+            List<Task> allCompletedTasks = taskRepository.findByGoalIdAndStatus(goalId, TaskStatus.COMPLETED);
+            System.out.println("Found " + allCompletedTasks.size() + " completed tasks for this goal");
+
+            System.out.println("Fetching completed projects for goal ID: " + goalId);
+            List<Project> allCompletedProjects = projectRepository.findByGoalIdAndStatus(goalId, ProjectStatus.COMPLETED);
+            System.out.println("Found " + allCompletedProjects.size() + " completed projects for this goal");
 
         // Calculate progress for each of the last 7 days
         for (int i = 6; i >= 0; i--) {
@@ -160,6 +177,7 @@ public class GoalsService {
             // Filter tasks completed on this specific day
             List<Task> dayTasks = allCompletedTasks.stream()
                 .filter(task -> {
+                    if (task.getUpdatedAt() == null) return false;
                     LocalDate taskDate = task.getUpdatedAt().toLocalDate();
                     return taskDate.equals(date);
                 })
@@ -168,6 +186,7 @@ public class GoalsService {
             // Filter projects completed on this specific day
             List<Project> dayProjects = allCompletedProjects.stream()
                 .filter(project -> {
+                    if (project.getUpdatedAt() == null) return false;
                     LocalDate projectDate = project.getUpdatedAt().toLocalDate();
                     return projectDate.equals(date);
                 })
@@ -191,7 +210,14 @@ public class GoalsService {
             progressData.add(new GoalProgressData(date, dailyProgress, completedItems));
         }
 
+        System.out.println("Generated " + progressData.size() + " days of progress data");
         return progressData;
+        
+        } catch (Exception e) {
+            System.err.println("Error in getGoalProgressData: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     // Helper class for progress data

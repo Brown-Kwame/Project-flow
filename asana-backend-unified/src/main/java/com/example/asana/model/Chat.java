@@ -36,6 +36,9 @@ public class Chat {
     @JoinColumn(name = "reply_to_id", insertable = false, updatable = false)
     private Chat replyToMessage;
 
+    @Column(name = "chat_id")
+    private String chatId;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

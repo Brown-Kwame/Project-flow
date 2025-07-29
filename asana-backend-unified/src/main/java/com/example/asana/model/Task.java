@@ -47,6 +47,9 @@ public class Task {
     @JoinColumn(name = "project_id")
     private Project project;
 
+    @Column(name = "goal_id")
+    private Long goalId;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();

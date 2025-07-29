@@ -1,6 +1,7 @@
 package com.example.asana.repository;
 
 import com.example.asana.model.Project;
+import com.example.asana.model.ProjectStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -20,7 +21,11 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     List<Project> findByPortfolioIdAndOwnerUser_Id(Long portfolioId, Long ownerUserId);
     
-    List<Project> findByOwnerUser_IdAndStatus(Long ownerUserId, String status);
+    List<Project> findByOwnerUser_IdAndStatus(Long ownerUserId, ProjectStatus status);
     
     List<Project> findByOwnerUser_IdIn(List<Long> ownerUserIds);
+    
+    List<Project> findByGoalIdAndStatus(Long goalId, ProjectStatus status);
+    
+    List<Project> findByGoalId(Long goalId);
 } 

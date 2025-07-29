@@ -55,6 +55,9 @@ public class Project {
     @Column(name = "starred", nullable = false)
     private boolean starred = false;
 
+    @Column(name = "goal_id")
+    private Long goalId;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
