@@ -8,6 +8,7 @@ C:\Users\kwame\OneDrive\Desktop\Cursor fullstack\FullStack\asana-backend-unified
 C:\Users\kwame\OneDrive\Desktop\Cursor fullstack\FullStack\asana-backend-unified\src\main\java\com\example\asana\exception\GlobalExceptionHandler.java
 C:\Users\kwame\OneDrive\Desktop\Cursor fullstack\FullStack\asana-backend-unified\src\main\java\com\example\asana\dto\UpdateTaskRequest.java
 C:\Users\kwame\OneDrive\Desktop\Cursor fullstack\FullStack\asana-backend-unified\src\main\java\com\example\asana\model\Team.java
+C:\Users\kwame\OneDrive\Desktop\Cursor fullstack\FullStack\asana-backend-unified\src\main\java\com\example\asana\config\WebConfig.java
 C:\Users\kwame\OneDrive\Desktop\Cursor fullstack\FullStack\asana-backend-unified\src\main\java\com\example\asana\repository\ChatRepository.java
 C:\Users\kwame\OneDrive\Desktop\Cursor fullstack\FullStack\asana-backend-unified\src\main\java\com\example\asana\model\Chat.java
 C:\Users\kwame\OneDrive\Desktop\Cursor fullstack\FullStack\asana-backend-unified\src\main\java\com\example\asana\repository\GoalsRepository.java
@@ -17,6 +18,7 @@ C:\Users\kwame\OneDrive\Desktop\Cursor fullstack\FullStack\asana-backend-unified
 C:\Users\kwame\OneDrive\Desktop\Cursor fullstack\FullStack\asana-backend-unified\src\main\java\com\example\asana\controller\ChatController.java
 C:\Users\kwame\OneDrive\Desktop\Cursor fullstack\FullStack\asana-backend-unified\src\main\java\com\example\asana\controller\ProjectController.java
 C:\Users\kwame\OneDrive\Desktop\Cursor fullstack\FullStack\asana-backend-unified\src\main\java\com\example\asana\controller\TeamController.java
+C:\Users\kwame\OneDrive\Desktop\Cursor fullstack\FullStack\asana-backend-unified\src\main\java\com\example\asana\dto\TeamDetailResponse.java
 C:\Users\kwame\OneDrive\Desktop\Cursor fullstack\FullStack\asana-backend-unified\src\main\java\com\example\asana\model\ERole.java
 C:\Users\kwame\OneDrive\Desktop\Cursor fullstack\FullStack\asana-backend-unified\src\main\java\com\example\asana\security\jwt\JwtUtils.java
 C:\Users\kwame\OneDrive\Desktop\Cursor fullstack\FullStack\asana-backend-unified\src\main\java\com\example\asana\AsanaBackendApplication.java
@@ -53,6 +55,7 @@ C:\Users\kwame\OneDrive\Desktop\Cursor fullstack\FullStack\asana-backend-unified
 C:\Users\kwame\OneDrive\Desktop\Cursor fullstack\FullStack\asana-backend-unified\src\main\java\com\example\asana\dto\UserUpdateRequest.java
 C:\Users\kwame\OneDrive\Desktop\Cursor fullstack\FullStack\asana-backend-unified\src\main\java\com\example\asana\repository\TeamMemberRepository.java
 C:\Users\kwame\OneDrive\Desktop\Cursor fullstack\FullStack\asana-backend-unified\src\main\java\com\example\asana\dto\LoginRequest.java
+C:\Users\kwame\OneDrive\Desktop\Cursor fullstack\FullStack\asana-backend-unified\src\main\java\com\example\asana\dto\UserResponse.java
 C:\Users\kwame\OneDrive\Desktop\Cursor fullstack\FullStack\asana-backend-unified\src\main\java\com\example\asana\model\ProjectStatus.java
 C:\Users\kwame\OneDrive\Desktop\Cursor fullstack\FullStack\asana-backend-unified\src\main\java\com\example\asana\service\GoalsService.java
 C:\Users\kwame\OneDrive\Desktop\Cursor fullstack\FullStack\asana-backend-unified\src\main\java\com\example\asana\security\services\UserDetailsServiceImpl.java

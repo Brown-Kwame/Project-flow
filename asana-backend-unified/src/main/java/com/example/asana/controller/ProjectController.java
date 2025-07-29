@@ -3,11 +3,14 @@ package com.example.asana.controller;
 import com.example.asana.model.Project;
 import com.example.asana.model.ProjectStatus;
 import com.example.asana.service.ProjectService;
+import com.example.asana.security.services.UserDetailsImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -25,18 +28,53 @@ public class ProjectController {
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<Project>> getAllProjects() {
-        List<Project> projects = projectService.getAllProjects();
-        return new ResponseEntity<>(projects, HttpStatus.OK);
+        try {
+            // Get the authenticated user ID from security context
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof UserDetailsImpl) {
+                Long authenticatedUserId = ((UserDetailsImpl) authentication.getPrincipal()).getId();
+                List<Project> projects = projectService.getProjectsByOwnerUserId(authenticatedUserId);
+                return new ResponseEntity<>(projects, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Project> createProject(@Valid @RequestBody ProjectRequest request) {
-        if (request.getName() == null || request.getOwnerUserId() == null || request.getWorkspaceId() == null) {
+        System.out.println("=== PROJECT CREATION ENDPOINT CALLED ===");
+        System.out.println("createProject endpoint called");
+        System.out.println("Project name: " + request.getName());
+        System.out.println("Project description: " + request.getDescription());
+        System.out.println("Owner user ID: " + request.getOwnerUserId());
+        System.out.println("Workspace ID: " + request.getWorkspaceId());
+        
+        if (request.getName() == null || request.getOwnerUserId() == null) {
+            System.err.println("Missing required fields: name or ownerUserId");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        if (projectService.projectExistsInWorkspace(request.getName(), request.getWorkspaceId())) {
+        // Use default workspace ID if not provided
+        Long workspaceId = request.getWorkspaceId();
+        if (workspaceId == null) {
+            workspaceId = 1L; // Default workspace ID
+            System.out.println("Using default workspace ID: " + workspaceId);
+        }
+        
+        // Check if workspace exists (optional check)
+        try {
+            // For now, we'll assume workspace 1 exists
+            System.out.println("Workspace validation skipped - assuming workspace " + workspaceId + " exists");
+        } catch (Exception e) {
+            System.err.println("Workspace validation error: " + e.getMessage());
+        }
+
+        if (projectService.projectExistsInWorkspace(request.getName(), workspaceId)) {
+            System.err.println("Project already exists in workspace");
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
 
@@ -45,12 +83,57 @@ public class ProjectController {
                 request.getDescription(),
                 request.getStatus(),
                 request.getOwnerUserId(),
-                request.getWorkspaceId(),
+                workspaceId,
                 request.getStartDate(),
                 request.getDueDate(),
                 request.getPortfolioId()
         );
+        System.out.println("Project created successfully: " + newProject.getId());
         return new ResponseEntity<>(newProject, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/team/{teamId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Project> createTeamProject(@PathVariable Long teamId, @Valid @RequestBody ProjectRequest request) {
+        try {
+            System.out.println("=== TEAM PROJECT CREATION ENDPOINT CALLED ===");
+            System.out.println("Team ID: " + teamId);
+            System.out.println("Project name: " + request.getName());
+            System.out.println("Project description: " + request.getDescription());
+            System.out.println("Owner user ID: " + request.getOwnerUserId());
+            
+            if (request.getName() == null || request.getOwnerUserId() == null) {
+                System.err.println("Missing required fields: name or ownerUserId");
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+
+            // Use default workspace ID if not provided
+            Long workspaceId = request.getWorkspaceId();
+            if (workspaceId == null) {
+                workspaceId = 1L; // Default workspace ID
+                System.out.println("Using default workspace ID: " + workspaceId);
+            }
+
+            // Create team project with special logic
+            Project teamProject = projectService.createTeamProject(
+                    request.getName(),
+                    request.getDescription(),
+                    request.getStatus(),
+                    request.getOwnerUserId(),
+                    workspaceId,
+                    teamId,
+                    request.getStartDate(),
+                    request.getDueDate(),
+                    request.getPortfolioId()
+            );
+            
+            System.out.println("Team project created successfully: " + teamProject.getId());
+            return new ResponseEntity<>(teamProject, HttpStatus.CREATED);
+        } catch (Exception e) {
+            System.err.println("Error in createTeamProject: " + e.getMessage());
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping("/{id}")

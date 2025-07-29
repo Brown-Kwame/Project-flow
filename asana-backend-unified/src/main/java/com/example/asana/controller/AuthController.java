@@ -11,6 +11,7 @@ import com.example.asana.repository.RoleRepository;
 import com.example.asana.repository.UserRepository;
 import com.example.asana.security.jwt.JwtUtils;
 import com.example.asana.security.services.UserDetailsImpl;
+import com.example.asana.service.NotificationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +46,9 @@ public class AuthController {
     @Autowired
     JwtUtils jwtUtils;
 
+    @Autowired
+    NotificationService notificationService;
+
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         try {
@@ -63,6 +67,21 @@ public class AuthController {
 
             System.out.println("Authentication successful for user: " + userDetails.getUsername());
             System.out.println("User roles: " + roles);
+
+            // Create login notification
+            try {
+                notificationService.createNotification(
+                    userDetails.getId(),
+                    "Welcome back! You have successfully logged in to your account.",
+                    "LOGIN",
+                    userDetails.getId(),
+                    "USER"
+                );
+                System.out.println("Login notification created for user: " + userDetails.getUsername());
+            } catch (Exception e) {
+                System.err.println("Failed to create login notification for user: " + userDetails.getUsername());
+                e.printStackTrace();
+            }
 
             return ResponseEntity.ok(new JwtResponse(jwt,
                     userDetails.getId(),
@@ -110,7 +129,22 @@ public class AuthController {
         }
 
         user.setRoles(roles);
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        // Create welcome notification for new user
+        try {
+            notificationService.createNotification(
+                savedUser.getId(),
+                "Sign up successful! Welcome to Project Flow. Your account has been created successfully. Start by exploring your dashboard and creating your first project.",
+                "WELCOME",
+                savedUser.getId(),
+                "USER"
+            );
+            System.out.println("Welcome notification created for user: " + savedUser.getUsername());
+        } catch (Exception e) {
+            System.err.println("Failed to create welcome notification for user: " + savedUser.getUsername());
+            e.printStackTrace();
+        }
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }

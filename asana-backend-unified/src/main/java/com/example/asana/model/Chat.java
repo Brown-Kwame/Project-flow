@@ -29,6 +29,13 @@ public class Chat {
     @Column(name = "is_read", nullable = false)
     private Boolean isRead = false;
 
+    @Column(name = "reply_to_id", nullable = true)
+    private Long replyToId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reply_to_id", insertable = false, updatable = false)
+    private Chat replyToMessage;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

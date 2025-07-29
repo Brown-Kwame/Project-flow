@@ -1,5 +1,8 @@
 {
   "dependencies": {
     "@stomp/stompjs": "^7.1.1"
+  },
+  "devDependencies": {
+    "typescript": "~5.8.3"
   }
 }

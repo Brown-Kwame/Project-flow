@@ -33,6 +33,36 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    public List<com.example.asana.dto.UserResponse> getAllUsersResponse() {
+        try {
+            System.out.println("Getting all users from repository...");
+            List<User> users = userRepository.findAll();
+            System.out.println("Found " + users.size() + " users");
+            
+            List<com.example.asana.dto.UserResponse> responses = users.stream()
+                    .map(this::convertToUserResponse)
+                    .collect(java.util.stream.Collectors.toList());
+            
+            System.out.println("Converted to " + responses.size() + " user responses");
+            return responses;
+        } catch (Exception e) {
+            System.err.println("Error in getAllUsersResponse: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    private com.example.asana.dto.UserResponse convertToUserResponse(User user) {
+        return new com.example.asana.dto.UserResponse(
+            user.getId(),
+            user.getUsername(),
+            user.getEmail(),
+            user.getFullName(),
+            user.getProfilePictureUrl(),
+            user.getCreatedAt()
+        );
+    }
+
     public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
     }

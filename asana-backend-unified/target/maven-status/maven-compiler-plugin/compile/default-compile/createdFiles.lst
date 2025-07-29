@@ -9,6 +9,7 @@ com\example\asana\security\jwt\JwtUtils.class
 com\example\asana\model\Role.class
 com\example\asana\service\TeamService.class
 com\example\asana\dto\MessageResponse.class
+com\example\asana\service\GoalsService$GoalProgressData.class
 com\example\asana\controller\ChatWebSocketController$TypingIndicator.class
 com\example\asana\model\TeamRole.class
 com\example\asana\model\TaskStatus.class
@@ -29,6 +30,7 @@ com\example\asana\model\ProjectStatus.class
 com\example\asana\config\WebSocketConfig.class
 com\example\asana\controller\UserController.class
 com\example\asana\service\ProjectService.class
+com\example\asana\dto\TeamDetailResponse.class
 com\example\asana\model\Goals.class
 com\example\asana\repository\NotificationRepository.class
 com\example\asana\dto\JwtResponse.class
@@ -65,7 +67,9 @@ com\example\asana\service\GoalsService.class
 com\example\asana\dto\TeamMemberRequest.class
 com\example\asana\model\Portfolio.class
 com\example\asana\controller\PortfolioController.class
+com\example\asana\config\WebConfig.class
 com\example\asana\repository\TeamMemberRepository.class
+com\example\asana\dto\UserResponse.class
 com\example\asana\security\jwt\AuthEntryPointJwt.class
 com\example\asana\model\Project.class
 com\example\asana\repository\ChatRepository.class

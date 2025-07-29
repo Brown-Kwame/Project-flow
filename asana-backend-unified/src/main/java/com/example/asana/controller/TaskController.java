@@ -4,10 +4,13 @@ import com.example.asana.dto.CreateTaskRequest;
 import com.example.asana.dto.TaskResponse;
 import com.example.asana.dto.UpdateTaskRequest;
 import com.example.asana.service.TaskService;
+import com.example.asana.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,8 +27,15 @@ public class TaskController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<TaskResponse>> getAllTasks() {
         try {
-            List<TaskResponse> tasks = taskService.getAllTasks();
-            return new ResponseEntity<>(tasks, HttpStatus.OK);
+            // Get the authenticated user ID from security context
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof UserDetailsImpl) {
+                Long authenticatedUserId = ((UserDetailsImpl) authentication.getPrincipal()).getId();
+                List<TaskResponse> tasks = taskService.getTasksByUserId(authenticatedUserId);
+                return new ResponseEntity<>(tasks, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

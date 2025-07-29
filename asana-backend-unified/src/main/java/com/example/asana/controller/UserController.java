@@ -26,10 +26,33 @@ public class UserController {
     private UserService userService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
-        return new ResponseEntity<>(users, HttpStatus.OK);
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<com.example.asana.dto.UserResponse>> getAllUsers() {
+        try {
+            System.out.println("getAllUsers endpoint called");
+            List<com.example.asana.dto.UserResponse> users = userService.getAllUsersResponse();
+            System.out.println("Successfully retrieved " + users.size() + " users");
+            return new ResponseEntity<>(users, HttpStatus.OK);
+        } catch (Exception e) {
+            System.err.println("Error in getAllUsers endpoint: " + e.getMessage());
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // Test endpoint to check if basic user retrieval works
+    @GetMapping("/test")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> testUsers() {
+        try {
+            System.out.println("Test endpoint called");
+            long count = userService.getAllUsers().size();
+            return new ResponseEntity<>("Found " + count + " users", HttpStatus.OK);
+        } catch (Exception e) {
+            System.err.println("Error in test endpoint: " + e.getMessage());
+            e.printStackTrace();
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/me")

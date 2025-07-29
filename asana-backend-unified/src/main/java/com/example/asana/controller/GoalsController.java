@@ -4,10 +4,13 @@ import com.example.asana.dto.GoalRequest;
 import com.example.asana.model.Goals;
 import com.example.asana.model.GoalsStatus;
 import com.example.asana.service.GoalsService;
+import com.example.asana.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -27,8 +30,15 @@ public class GoalsController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<Goals>> getAllGoals() {
         try {
-            List<Goals> goals = goalService.getAllGoals();
-            return new ResponseEntity<>(goals, HttpStatus.OK);
+            // Get the authenticated user ID from security context
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof UserDetailsImpl) {
+                Long authenticatedUserId = ((UserDetailsImpl) authentication.getPrincipal()).getId();
+                List<Goals> goals = goalService.getGoalsByOwnerUserId(authenticatedUserId);
+                return new ResponseEntity<>(goals, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

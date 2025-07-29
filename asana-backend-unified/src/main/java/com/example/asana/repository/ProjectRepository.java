@@ -21,4 +21,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     List<Project> findByPortfolioIdAndOwnerUser_Id(Long portfolioId, Long ownerUserId);
     
     List<Project> findByOwnerUser_IdAndStatus(Long ownerUserId, String status);
+    
+    List<Project> findByOwnerUser_IdIn(List<Long> ownerUserIds);
 } 

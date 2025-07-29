@@ -23,8 +23,19 @@ public class ChatService {
         return chatRepository.save(message);
     }
 
+    @Transactional(readOnly = true)
     public List<Chat> getChatHistory(Long user1Id, Long user2Id) {
-        return chatRepository.findChatHistory(user1Id, user2Id);
+        List<Chat> messages = chatRepository.findChatHistory(user1Id, user2Id);
+        
+        // Load replyToMessage for each message that has a replyToId
+        for (Chat message : messages) {
+            if (message.getReplyToId() != null) {
+                Chat replyMessage = chatRepository.findById(message.getReplyToId()).orElse(null);
+                message.setReplyToMessage(replyMessage);
+            }
+        }
+        
+        return messages;
     }
 
     public int getUnreadMessageCount(Long senderId, Long recipientId) {

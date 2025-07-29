@@ -37,6 +37,7 @@ public class ChatController {
         message.setSenderId(request.getSenderId());
         message.setRecipientId(request.getRecipientId());
         message.setContent(request.getContent());
+        message.setReplyToId(request.getReplyToId());
         Chat savedMessage = chatService.saveChatMessage(message);
         return new ResponseEntity<>(savedMessage, HttpStatus.CREATED);
     }

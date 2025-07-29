@@ -3,10 +3,13 @@ package com.example.asana.controller;
 import com.example.asana.dto.CreateNotificationRequest;
 import com.example.asana.model.Notification;
 import com.example.asana.service.NotificationService;
+import com.example.asana.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,7 +27,12 @@ public class NotificationController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<Notification>> getAllNotifications() {
         try {
-            List<Notification> notifications = notificationService.getAllNotifications();
+            // Get the authenticated user's ID
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            Long authenticatedUserId = userDetails.getId();
+            
+            List<Notification> notifications = notificationService.getNotificationsByUserId(authenticatedUserId);
             return new ResponseEntity<>(notifications, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

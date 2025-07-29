@@ -7,4 +7,5 @@ public class SendMessageRequest {
     private Long senderId;
     private Long recipientId;
     private String content;
+    private Long replyToId;
 } 
