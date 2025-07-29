@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class GoalsService {
@@ -139,7 +140,7 @@ public class GoalsService {
     }
 
     /**
-     * Get goal progress data for the last 7 days (simplified version)
+     * Get goal progress data for the last 7 days with proper daily tracking
      */
     public List<GoalProgressData> getGoalProgressData(Long goalId) {
         Goals goal = goalRepository.findById(goalId)
@@ -148,18 +149,46 @@ public class GoalsService {
         List<GoalProgressData> progressData = new ArrayList<>();
         LocalDate today = LocalDate.now();
 
-        // For now, return simplified data without complex date filtering
+        // Get all completed tasks and projects for the goal owner
+        List<Task> allCompletedTasks = taskRepository.findByAssignedUser_IdAndStatus(goal.getOwnerUserId(), "COMPLETED");
+        List<Project> allCompletedProjects = projectRepository.findByOwnerUser_IdAndStatus(goal.getOwnerUserId(), "COMPLETED");
+
+        // Calculate progress for each of the last 7 days
         for (int i = 6; i >= 0; i--) {
             LocalDate date = today.minusDays(i);
             
-            // Calculate a simple daily progress based on total completions
-            // This is a simplified approach to avoid complex date queries
-            double dailyProgress = 0;
+            // Filter tasks completed on this specific day
+            List<Task> dayTasks = allCompletedTasks.stream()
+                .filter(task -> {
+                    LocalDate taskDate = task.getUpdatedAt().toLocalDate();
+                    return taskDate.equals(date);
+                })
+                .collect(Collectors.toList());
+
+            // Filter projects completed on this specific day
+            List<Project> dayProjects = allCompletedProjects.stream()
+                .filter(project -> {
+                    LocalDate projectDate = project.getUpdatedAt().toLocalDate();
+                    return projectDate.equals(date);
+                })
+                .collect(Collectors.toList());
+
+            // Calculate daily progress
+            int completedItems = dayTasks.size() + dayProjects.size();
+            double dailyProgress = 0.0;
+
             if (goal.getTargetValue() != null && goal.getTargetValue() > 0) {
-                dailyProgress = Math.min(100, (goal.getCurrentValue() / goal.getTargetValue()) * 100 / 7);
+                // Calculate progress based on completed items for this day
+                // Each task = 1 point, each project = 5 points
+                double dayPoints = (dayTasks.size() * 1.0) + (dayProjects.size() * 5.0);
+                double targetPerDay = goal.getTargetValue() / 7.0; // Distribute target across 7 days
+                
+                if (targetPerDay > 0) {
+                    dailyProgress = Math.min(100.0, (dayPoints / targetPerDay) * 100.0);
+                }
             }
-            
-            progressData.add(new GoalProgressData(date, dailyProgress, 0));
+
+            progressData.add(new GoalProgressData(date, dailyProgress, completedItems));
         }
 
         return progressData;

@@ -2,7 +2,9 @@ package com.example.asana.service;
 
 import com.example.asana.exception.ResourceNotFoundException;
 import com.example.asana.model.Portfolio;
+import com.example.asana.model.Project;
 import com.example.asana.repository.PortfolioRepository;
+import com.example.asana.repository.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,9 @@ public class PortfolioService {
 
     @Autowired
     private PortfolioRepository portfolioRepository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
 
     public List<Portfolio> getAllPortfolios() {
         return portfolioRepository.findAll();
@@ -48,9 +53,48 @@ public class PortfolioService {
 
     @Transactional
     public boolean deletePortfolio(Long id, Long userId) {
-        return portfolioRepository.findByUserIdAndId(userId, id).map(portfolio -> {
-            portfolioRepository.delete(portfolio);
-            return true;
-        }).orElse(false);
+        System.out.println("PortfolioService.deletePortfolio called with id: " + id + ", userId: " + userId);
+        
+        try {
+            // First check if portfolio exists
+            Optional<Portfolio> portfolioOpt = portfolioRepository.findByUserIdAndId(userId, id);
+            if (portfolioOpt.isPresent()) {
+                Portfolio portfolio = portfolioOpt.get();
+                System.out.println("Found portfolio: " + portfolio.getName() + " (ID: " + portfolio.getId() + ")");
+                
+                try {
+                    // First, delete all projects associated with this portfolio
+                    List<Project> associatedProjects = projectRepository.findByPortfolioId(id);
+                    System.out.println("Found " + associatedProjects.size() + " projects associated with portfolio " + id);
+                    
+                    if (!associatedProjects.isEmpty()) {
+                        projectRepository.deleteAll(associatedProjects);
+                        System.out.println("Deleted " + associatedProjects.size() + " associated projects");
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error deleting associated projects: " + e.getMessage());
+                    e.printStackTrace();
+                    // Continue with portfolio deletion even if project deletion fails
+                }
+                
+                try {
+                    // Then delete the portfolio
+                    portfolioRepository.delete(portfolio);
+                    System.out.println("Portfolio deleted successfully");
+                    return true;
+                } catch (Exception e) {
+                    System.err.println("Error deleting portfolio: " + e.getMessage());
+                    e.printStackTrace();
+                    throw e;
+                }
+            } else {
+                System.err.println("Portfolio not found for id: " + id + ", userId: " + userId);
+                return false;
+            }
+        } catch (Exception e) {
+            System.err.println("Error in deletePortfolio: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 } 
