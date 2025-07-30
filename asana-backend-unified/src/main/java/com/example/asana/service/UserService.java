@@ -133,7 +133,7 @@ public class UserService {
             System.out.println("File saved successfully");
             
             // Update user's profile picture URL
-            String profilePictureUrl = "http://192.168.0.133:8080/uploads/profile-pictures/" + fileName;
+            String profilePictureUrl = "http://192.168.244.88:8080/uploads/profile-pictures/" + fileName;
             user.setProfilePictureUrl(profilePictureUrl);
             User savedUser = userRepository.save(user);
             

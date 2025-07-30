@@ -18,6 +18,10 @@ public class ChatService {
         return chatRepository.findAll();
     }
 
+    public List<Chat> getConversationsForUser(Long userId) {
+        return chatRepository.findConversationsForUser(userId);
+    }
+
     @Transactional
     public Chat saveChatMessage(Chat message) {
         return chatRepository.save(message);

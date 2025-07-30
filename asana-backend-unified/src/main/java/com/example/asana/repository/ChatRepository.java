@@ -22,4 +22,8 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
     
     @Query("SELECT COUNT(c) FROM Chat c WHERE c.recipientId = :userId AND c.isRead = false")
     int countTotalUnreadMessages(@Param("userId") Long userId);
+    
+    @Query("SELECT DISTINCT c FROM Chat c WHERE c.senderId = :userId OR c.recipientId = :userId " +
+           "ORDER BY c.createdAt DESC")
+    List<Chat> findConversationsForUser(@Param("userId") Long userId);
 } 

@@ -34,6 +34,22 @@ public class ChatController {
         }
     }
 
+    @GetMapping("/conversations")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<Chat>> getConversations() {
+        try {
+            // Get the current user's ID from security context
+            org.springframework.security.core.Authentication authentication = 
+                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            Long currentUserId = Long.parseLong(authentication.getName());
+            
+            List<Chat> conversations = chatService.getConversationsForUser(currentUserId);
+            return new ResponseEntity<>(conversations, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @PostMapping("/send")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Chat> sendMessage(@RequestBody SendMessageRequest request) {
